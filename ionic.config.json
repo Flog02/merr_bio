@@ -1,0 +1,7 @@
+{
+  "name": "merr_bio",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
