@@ -1,27 +1,215 @@
-#container {
+// home.page.scss
+.hero-container {
+  padding: 40px 20px;
   text-align: center;
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/assets/hero-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  height: 40vh;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    max-width: 600px;
+  }
+
+  .main-cta {
+    --background: var(--ion-color-primary);
+    --color: white;
+    font-weight: 600;
+    max-width: 280px;
+    width: 100%;
+  }
+
+  .secondary-cta {
+    --border-color: white;
+    --color: white;
+    max-width: 280px;
+    width: 100%;
+  }
 }
 
-#container strong {
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  margin-bottom: 16px;
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.product-slider {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 16px 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.product-card {
+  flex: 0 0 auto;
+  width: 180px;
+  margin-right: 16px;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-radius: 16px;
+  overflow: hidden;
+
+  img {
+    height: 140px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .price {
+    color: var(--ion-color-primary);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 6px;
+
+    .unit {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--accent-gray);
+    }
+  }
+
+  .availability {
+    font-size: 14px;
+    color: var(--accent-gray);
+  }
+}
+
+.featured-section, 
+.categories-section, 
+.how-it-works-container {
+  padding: 30px 0 10px;
+}
+
+.categories-section h2, 
+.how-it-works-container h2 {
+  text-align: center;
+  margin-bottom: 24px;
   font-size: 20px;
-  line-height: 26px;
+  font-weight: 600;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+.category-card {
+  background-color: white;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
 
-  color: #8c8c8c;
+  &:active {
+    transform: scale(0.98);
+  }
 
-  margin: 0;
+  ion-icon {
+    font-size: 40px;
+    color: var(--ion-color-primary);
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
 }
 
-#container a {
-  text-decoration: none;
+.step-card {
+  background-color: white;
+  border-radius: 16px;
+  padding: 30px 20px 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  height: 100%;
+  position: relative;
+  margin-top: 24px;
+
+  .step-number {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: var(--ion-color-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  ion-icon {
+    font-size: 36px;
+    color: var(--ion-color-primary);
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: var(--accent-gray);
+    font-size: 14px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .hero-container {
+    height: 35vh;
+    h1 {
+      font-size: 1.8rem;
+    }
+    p {
+      font-size: 1rem;
+    }
+  }
+  
+  .step-card {
+    margin-bottom: 30px;
+  }
 }

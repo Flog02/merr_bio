@@ -1,20 +1,115 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>MerrBio</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <!-- Hero section -->
+  <div class="hero-container">
+    <h1>{{ 'HOME_TITLE' | translate }}</h1>
+    <p>{{ 'HOME_SUBTITLE' | translate }}</p>
+    <ion-button routerLink="/products" expand="block" class="main-cta">
+      {{ 'BROWSE_PRODUCTS' | translate }}
+    </ion-button>
+    
+    <ng-container *ngIf="!currentUser">
+      <ion-button routerLink="/register" expand="block" fill="outline" class="ion-margin-top secondary-cta">
+        {{ 'REGISTER' | translate }}
+      </ion-button>
+    </ng-container>
+  </div>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <!-- Featured Products -->
+  <div class="featured-section">
+    <div class="section-header">
+      <h2>{{ 'FEATURED_PRODUCTS' | translate }}</h2>
+      <ion-button fill="clear" routerLink="/products" size="small">
+        {{ 'VIEW_ALL' | translate }}
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="product-slider">
+      <ion-card class="product-card" *ngFor="let product of (featuredProducts$ | async)?.slice(0,4)" [routerLink]="['/products', product.id]">
+        <img src="assets/images/product-placeholder.jpg" alt="{{ product.name }}">
+        <ion-card-content>
+          <h3>{{ product.name }}</h3>
+          <div class="price">{{ product.price }} ALL <span class="unit">/ {{ product.unit }}</span></div>
+          <div class="availability">{{ product.quantity }} {{ product.unit }} {{ 'AVAILABLE' | translate }}</div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="categories-section">
+    <h2>{{ 'CATEGORIES' | translate }}</h2>
+    
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6" size-md="3">
+          <div class="category-card" routerLink="/products" [queryParams]="{category: 'vegetables'}">
+            <ion-icon name="leaf"></ion-icon>
+            <h3>{{ 'VEGETABLES' | translate }}</h3>
+          </div>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+          <div class="category-card" routerLink="/products" [queryParams]="{category: 'fruits'}">
+            <ion-icon name="nutrition"></ion-icon>
+            <h3>{{ 'FRUITS' | translate }}</h3>
+          </div>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+          <div class="category-card" routerLink="/products" [queryParams]="{category: 'dairy'}">
+            <ion-icon name="water"></ion-icon>
+            <h3>{{ 'DAIRY' | translate }}</h3>
+          </div>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+          <div class="category-card" routerLink="/products" [queryParams]="{category: 'other'}">
+            <ion-icon name="grid"></ion-icon>
+            <h3>{{ 'OTHER' | translate }}</h3>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- How it works -->
+  <div class="how-it-works-container">
+    <h2>{{ 'HOW_IT_WORKS' | translate }}</h2>
+    
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="4">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <ion-icon name="search"></ion-icon>
+            <h3>{{ 'BROWSE' | translate }}</h3>
+            <p>{{ 'BROWSE_DESCRIPTION' | translate }}</p>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="4">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <ion-icon name="basket"></ion-icon>
+            <h3>{{ 'REQUEST' | translate }}</h3>
+            <p>{{ 'REQUEST_DESCRIPTION' | translate }}</p>
+          </div>
+        </ion-col>
+        <ion-col size="12" size-md="4">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <ion-icon name="chatbubbles"></ion-icon>
+            <h3>{{ 'CONNECT' | translate }}</h3>
+            <p>{{ 'CONNECT_DESCRIPTION' | translate }}</p>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </div>
 </ion-content>

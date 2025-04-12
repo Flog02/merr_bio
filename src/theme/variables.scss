@@ -1,2 +1,76 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+// src/theme/variables.scss
+// :root {
+//     // Primary green from mockup
+//     --ion-color-primary: #0a7c3e;
+//     --ion-color-primary-rgb: 10, 124, 62;
+//     --ion-color-primary-contrast: #ffffff;
+//     --ion-color-primary-contrast-rgb: 255, 255, 255;
+//     --ion-color-primary-shade: #096d37;
+//     --ion-color-primary-tint: #238c51;
+  
+//     // Light background color
+//     --ion-color-light: #f5f8f5;
+//     --ion-color-light-rgb: 245, 248, 245;
+//     --ion-color-light-contrast: #000000;
+//     --ion-color-light-contrast-rgb: 0, 0, 0;
+//     --ion-color-light-shade: #d8dbd8;
+//     --ion-color-light-tint: #f6f9f6;
+  
+//     // Other colors
+//     --ion-color-success: #2dd36f;
+//     --ion-color-warning: #ffc409;
+//     --ion-color-danger: #eb445a;
+    
+//     // Background
+//     --ion-background-color: #f5f8f5;
+    
+//     // Custom colors
+//     --accent-gray: #858585;
+//   }
+// src/theme/variables.scss
+:root {
+    // Primary green 
+    --ion-color-primary: #0a7c3e;
+    --ion-color-primary-rgb: 10, 124, 62;
+    --ion-color-primary-contrast: #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade: #096d37;
+    --ion-color-primary-tint: #238c51;
+  
+    // Light background color
+    --ion-color-light: #f5f8f5;
+    --ion-color-light-rgb: 245, 248, 245;
+    --ion-color-light-contrast: #000000;
+    --ion-color-light-contrast-rgb: 0, 0, 0;
+    --ion-color-light-shade: #d8dbd8;
+    --ion-color-light-tint: #f6f9f6;
+  
+    // Other colors
+    --ion-color-success: #2dd36f;
+    --ion-color-warning: #ffc409;
+    --ion-color-danger: #eb445a;
+    
+    // Background
+    --ion-background-color: #f5f8f5;
+    
+    // Custom colors
+    --accent-gray: #858585;
+  }
+  
+  // Add some global styles
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  ion-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  
+  ion-button {
+    --border-radius: 12px;
+    font-weight: 500;
+  }
