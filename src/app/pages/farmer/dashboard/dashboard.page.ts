@@ -50,11 +50,8 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     IonToolbar,
     IonTitle,
     IonContent,
-    IonButton,
     IonIcon,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
     IonButtons,
     IonMenuButton,
@@ -65,14 +62,13 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     IonItemSliding,
     IonItemOptions,
     IonItemOption,
-    IonSkeletonText,
     IonFab,
     IonFabButton,
     IonGrid,
     IonRow,
     IonCol,
     IonSearchbar
-  ],
+],
   template: `
     <ion-header>
       <ion-toolbar>

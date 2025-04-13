@@ -9,7 +9,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonicModule, CommonModule, ReactiveFormsModule],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

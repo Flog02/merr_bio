@@ -51,7 +51,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <p><strong>{{ 'DESCRIPTION' | translate }}:</strong> {{ product.description }}</p>
         <p><strong>{{ 'AVAILABILITY' | translate }}:</strong> {{ product.quantity }} {{ product.unit }}</p>
         <p><strong>{{ 'CATEGORY' | translate }}:</strong> {{ product.category }}</p>
-        <p><strong>{{ 'CREATED_AT' | translate }}:</strong> {{ product.timestamp?.toDate() | date:'medium' }}</p>
+        <p><strong>{{ 'CREATED_AT' | translate }}:</strong> {{ product.timestamp.toDate() | date:'medium' }}</p>
       </ion-card-content>
     </ion-card>
 

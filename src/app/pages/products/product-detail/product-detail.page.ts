@@ -39,26 +39,15 @@ import { Timestamp } from '@angular/fire/firestore';
   selector: 'app-product-detail',
   standalone: true,
   imports: [
-    IonFooter,
     IonSpinner,
     CommonModule,
     TranslatePipe,
     IonHeader,
     IonToolbar,
-    IonTitle,
     IonContent,
     IonButton,
-    IonIcon,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
     IonButtons,
-    IonBackButton,
-    IonBadge,
-    IonChip,
-    IonImg
+    IonBackButton
 ],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar class="header-transparent">
