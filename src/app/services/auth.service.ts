@@ -1,4 +1,3 @@
-// src/app/services/auth.service.ts
 import { Injectable, inject } from '@angular/core';
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, user } from '@angular/fire/auth';
 import { Firestore, doc, getDoc, setDoc, Timestamp } from '@angular/fire/firestore';

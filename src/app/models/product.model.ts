@@ -1,4 +1,3 @@
-// src/app/models/product.model.ts
 import { Timestamp } from '@angular/fire/firestore';
 
 export interface Product {

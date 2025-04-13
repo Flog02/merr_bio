@@ -18,7 +18,6 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       <ion-back-button defaultHref="/admin/dashboard"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ 'PRODUCT_DETAILS' | translate }}</ion-title>
-    <!-- Add action buttons in the header -->
     <ion-buttons slot="end" *ngIf="product">
       <ion-button *ngIf="!product.approved" (click)="approveProduct()" color="success">
         <ion-icon slot="icon-only" name="checkmark-circle-outline"></ion-icon>
@@ -87,8 +86,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     <p>{{ 'LOADING_PRODUCT_DETAILS' | translate }}</p>
   </div>
 </ion-content>`,
-  styles:`/* Admin Product Detail styling with Ancker-inspired elegant design */
-
+  styles:`
   ion-header {
     ion-toolbar {
       --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));

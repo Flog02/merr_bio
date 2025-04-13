@@ -1,4 +1,3 @@
-// src/app/models/request.model.ts
 import { Timestamp } from '@angular/fire/firestore';
 
 export interface PurchaseRequest {

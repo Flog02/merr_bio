@@ -1,4 +1,4 @@
-// src/app/pages/home/home.page.ts
+
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -15,8 +15,7 @@ import { AuthService } from '../services/auth.service';
 import { ProductService } from '../services/product.service';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
-import { User } from '../models/user.model'; // Make sure to use your app's User model, not Firebase's
-
+import { User } from '../models/user.model'; 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',

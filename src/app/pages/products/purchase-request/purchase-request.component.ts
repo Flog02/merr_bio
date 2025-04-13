@@ -114,8 +114,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     </ion-card-content>
   </ion-card>
 </ion-content>`,
-  styles: [`/* Purchase request component styles with Ancker-inspired elegant design */
-
+  styles: [`
     ion-header {
       ion-toolbar {
         --background: var(--ion-color-primary);

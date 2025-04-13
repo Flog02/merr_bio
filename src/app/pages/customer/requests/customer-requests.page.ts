@@ -49,7 +49,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     </ion-button>
   </div>
 </ion-content>`,
-  styles:`/* Customer Requests styling with Ancker-inspired elegant design */
+  styles:`
 
   ion-header {
     ion-toolbar {

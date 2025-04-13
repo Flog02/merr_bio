@@ -66,7 +66,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     <p>{{ 'LOADING' | translate }}</p>
   </div>
 </ion-content>`,
-  styles:`/* Customer Profile styling with Ancker-inspired elegant design */
+  styles:`
 
   ion-header {
     ion-toolbar {

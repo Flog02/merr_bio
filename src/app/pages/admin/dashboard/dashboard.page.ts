@@ -76,8 +76,7 @@ import { FormsModule } from '@angular/forms';
     </ion-fab-button>
   </ion-fab>
 </ion-content>`,
-  styles: `/* Admin Dashboard styling with Ancker-inspired elegant design */
-
+  styles: `
   ion-header {
     ion-toolbar {
       &:first-child {

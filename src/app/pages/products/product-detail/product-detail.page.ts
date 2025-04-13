@@ -1,4 +1,3 @@
-// src/app/pages/products/product-detail/product-detail.page.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -127,8 +126,7 @@ import { Timestamp } from '@angular/fire/firestore';
 
 <!-- <ion-footer *ngIf="product && currentUser?.role === 'customer'" class="ion-no-border"></ion-footer> -->
 `,
-  styles: [`/* Product detail page styles with Ancker-inspired elegant design */
-
+  styles: [`
     .product-image {
       width: 100%;
       height: 320px;

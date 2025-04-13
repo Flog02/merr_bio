@@ -1,4 +1,3 @@
-// src/app/pages/customer/dashboard/customer-dashboard.page.ts
 import { Component, OnInit } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -82,8 +81,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     </ion-row>
   </ion-grid>
 </ion-content>`,
-  styles: [`/* Customer Dashboard styling with Ancker-inspired elegant design */
-
+  styles: [`
     ion-header {
       ion-toolbar {
         --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));

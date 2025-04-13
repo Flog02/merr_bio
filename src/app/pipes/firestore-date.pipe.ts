@@ -1,4 +1,3 @@
-// src/app/pipes/firestore-date.pipe.ts
 import { Pipe, PipeTransform } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Timestamp } from '@angular/fire/firestore';
