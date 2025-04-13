@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController, ActionSheetController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable, combineLatest, map } from 'rxjs';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Observable, combineLatest, map, startWith } from 'rxjs';
+import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { User } from '../../../models/user.model';
 import { UserService } from '../../../services/user.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -19,6 +19,11 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
           <ion-back-button defaultHref="/admin/dashboard"></ion-back-button>
         </ion-buttons>
         <ion-title>{{ 'MANAGE_USERS' | translate }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="openAddAdminModal()">
+            <ion-icon slot="icon-only" name="person-add"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar [formControl]="searchControl" placeholder="{{ 'SEARCH_USERS' | translate }}"></ion-searchbar>
@@ -43,19 +48,36 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 
     <ion-content>
       <ion-list>
-        <ion-item *ngFor="let user of filteredUsers$ | async">
-          <ion-avatar slot="start">
-            <img src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-          </ion-avatar>
-          <ion-label>
-            <h2>{{ user.displayName || 'No Name' }}</h2>
-            <p>{{ user.email }}</p>
-            <p *ngIf="user.phoneNumber">{{ user.phoneNumber }}</p>
-            <p *ngIf="user.location">{{ user.location }}</p>
+        <ion-item-sliding *ngFor="let user of filteredUsers$ | async">
+          <ion-item>
+            <ion-avatar slot="start">
+              <img [src]="user.profileImage || 'https://ionicframework.com/docs/img/demos/avatar.svg'" />
+            </ion-avatar>
+            <ion-label>
+              <h2>{{ user.displayName || 'No Name' }}</h2>
+              <p>{{ user.email }}</p>
+              <p *ngIf="user.phoneNumber">{{ user.phoneNumber }}</p>
+              <p *ngIf="user.location">{{ user.location }}</p>
+            </ion-label>
+            <ion-badge slot="end" color="{{ getRoleBadgeColor(user.role) }}">
+              {{ user.role | uppercase }}
+            </ion-badge>
+          </ion-item>
+          
+          <ion-item-options side="end">
+            <ion-item-option color="primary" (click)="showUserOptions(user)">
+              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="confirmDeleteUser(user)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+        
+        <ion-item *ngIf="(filteredUsers$ | async)?.length === 0">
+          <ion-label class="ion-text-center">
+            <p>{{ 'NO_USERS_FOUND' | translate }}</p>
           </ion-label>
-          <ion-badge slot="end" color="{{ getRoleBadgeColor(user.role) }}">
-            {{ user.role | uppercase }}
-          </ion-badge>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -70,10 +92,31 @@ export class AdminUsersPage implements OnInit {
 
   searchControl = new FormControl('');
   roleControl = new FormControl('all');
+  addAdminForm!: FormGroup;
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private alertController: AlertController,
+    private toastController: ToastController,
+    private actionSheetController: ActionSheetController,
+    private formBuilder: FormBuilder
+  ) {
+    this.createAddAdminForm();
+  }
 
   ngOnInit() {
+    this.loadUsers();
+  }
+  
+  createAddAdminForm() {
+    this.addAdminForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      displayName: ['', [Validators.required]]
+    });
+  }
+  
+  loadUsers() {
     this.customers$ = this.userService.getUsersByRole('customer');
     this.farmers$ = this.userService.getUsersByRole('farmer');
     this.admins$ = this.userService.getUsersByRole('admin');
@@ -84,8 +127,8 @@ export class AdminUsersPage implements OnInit {
     
     this.filteredUsers$ = combineLatest([
       this.allUsers$,
-      this.searchControl.valueChanges,
-      this.roleControl.valueChanges
+      this.searchControl.valueChanges.pipe(startWith('')),
+      this.roleControl.valueChanges.pipe(startWith('all'))
     ]).pipe(
       map(([users, searchTerm, role]) => {
         return users.filter(user => {
@@ -101,10 +144,10 @@ export class AdminUsersPage implements OnInit {
           
           const searchTermLower = searchTerm.toLowerCase();
           return (
-            user.displayName?.toLowerCase().includes(searchTermLower) ||
-            user.email.toLowerCase().includes(searchTermLower) ||
-            user.phoneNumber?.toLowerCase().includes(searchTermLower) ||
-            user.location?.toLowerCase().includes(searchTermLower)
+            (user.displayName?.toLowerCase().includes(searchTermLower) || false) ||
+            (user.email?.toLowerCase().includes(searchTermLower) || false) ||
+            (user.phoneNumber?.toLowerCase().includes(searchTermLower) || false) ||
+            (user.location?.toLowerCase().includes(searchTermLower) || false)
           );
         });
       })
@@ -118,5 +161,174 @@ export class AdminUsersPage implements OnInit {
       case 'customer': return 'primary';
       default: return 'medium';
     }
+  }
+  
+  async confirmDeleteUser(user: User) {
+    // Don't allow deleting yourself
+    const currentUser = await this.userService.getCurrentUser();
+    if (user.uid === currentUser?.uid) {
+      this.showToast('You cannot delete your own account', 'danger');
+      return;
+    }
+    
+    const alert = await this.alertController.create({
+      header: 'Confirm Delete',
+      message: `Are you sure you want to delete ${user.displayName || user.email}? This action cannot be undone.`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.deleteUser(user);
+          }
+        }
+      ]
+    });
+    
+    await alert.present();
+  }
+  
+  async deleteUser(user: User) {
+    try {
+      await this.userService.deleteUser(user.uid);
+      this.showToast(`User ${user.displayName || user.email} deleted successfully`, 'success');
+      // Reload users
+      this.loadUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      this.showToast('Failed to delete user', 'danger');
+    }
+  }
+  
+  async showUserOptions(user: User) {
+    // Don't allow changing your own role
+    const currentUser = await this.userService.getCurrentUser();
+    const isCurrentUser = user.uid === currentUser?.uid;
+    
+    const buttons: any[] = [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      }
+    ];
+    
+    // Add role change options if not current user
+    if (!isCurrentUser) {
+      if (user.role !== 'admin') {
+        buttons.unshift({
+          text: 'Make Admin',
+          handler: () => {
+            this.changeUserRole(user, 'admin');
+          }
+        });
+      }
+      
+      if (user.role !== 'farmer') {
+        buttons.unshift({
+          text: 'Make Farmer',
+          handler: () => {
+            this.changeUserRole(user, 'farmer');
+          }
+        });
+      }
+      
+      if (user.role !== 'customer') {
+        buttons.unshift({
+          text: 'Make Customer',
+          handler: () => {
+            this.changeUserRole(user, 'customer');
+          }
+        });
+      }
+    }
+    
+    const actionSheet = await this.actionSheetController.create({
+      header: `Options for ${user.displayName || user.email}`,
+      buttons
+    });
+    
+    await actionSheet.present();
+  }
+  
+  async changeUserRole(user: User, newRole: 'admin' | 'farmer' | 'customer') {
+    try {
+      await this.userService.updateUser(user.uid, { role: newRole });
+      this.showToast(`User role changed to ${newRole}`, 'success');
+      // Reload users
+      this.loadUsers();
+    } catch (error) {
+      console.error('Error changing user role:', error);
+      this.showToast('Failed to change user role', 'danger');
+    }
+  }
+  
+  async openAddAdminModal() {
+    const alert = await this.alertController.create({
+      header: 'Add Admin User',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'Email'
+        },
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: 'Password'
+        },
+        {
+          name: 'displayName',
+          type: 'text',
+          placeholder: 'Name'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Add',
+          handler: (data) => {
+            if (!data.email || !data.password || !data.displayName) {
+              this.showToast('All fields are required', 'danger');
+              return false;
+            }
+            
+            this.addAdminUser(data.email, data.password, data.displayName);
+            return true;
+          }
+        }
+      ]
+    });
+    
+    await alert.present();
+  }
+  
+  async addAdminUser(email: string, password: string, displayName: string) {
+    try {
+      await this.userService.createAdminUser(email, password, displayName);
+      this.showToast('Admin user created successfully', 'success');
+      // Reload users
+      this.loadUsers();
+    } catch (error) {
+      console.error('Error creating admin user:', error);
+      this.showToast('Failed to create admin user', 'danger');
+    }
+  }
+  
+  async showToast(message: string, color: 'success' | 'danger' = 'success') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom'
+    });
+    
+    await toast.present();
   }
 }
