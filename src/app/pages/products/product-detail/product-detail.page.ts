@@ -67,7 +67,7 @@ import { Timestamp } from '@angular/fire/firestore';
     </div>
     
     <!-- Product Info -->
-    <div class="product-container">
+    <div class="product-container" style="margin-bottom: 35px;">
       <h1 class="product-title">{{ product.name }}</h1>
       <div class="product-price">{{ product.price }} ALL<span class="unit">/{{ product.unit }}</span></div>
       
