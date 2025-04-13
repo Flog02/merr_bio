@@ -1,3 +1,6 @@
+
+
+
 .hero-container {
   padding: 40px 20px;
   text-align: center;
@@ -211,4 +214,23 @@
   .step-card {
     margin-bottom: 30px;
   }
+}
+ion-header {
+  ion-toolbar {
+    --background: var(--ion-color-primary);
+    --color: white;
+    text-align: center;
+    
+    ion-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+    }
+    
+    ion-menu-button {
+      --color: white;
+    }
+  }
+}
+--scroll-bar-background{
+  background-color: white;
 }

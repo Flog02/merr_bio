@@ -16,6 +16,8 @@ import { ProductService } from '../services/product.service';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
 import { User } from '../models/user.model'; 
+import { Auth } from '@angular/fire/auth';
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -37,7 +39,8 @@ import { User } from '../models/user.model';
     IonGrid,
     IonRow,
     IonCol,
-    IonMenuButton
+    IonMenuButton,
+    
 ]
 })
 export class HomePage {
@@ -46,7 +49,8 @@ export class HomePage {
   
   constructor(
     private authService: AuthService,
-    private productService: ProductService
+    private productService: ProductService,
+    private auth: Auth
   ) {
     addIcons({ leaf, nutrition, people, globe, basket, chatbubbles, person });
     

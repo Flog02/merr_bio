@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
+import { Auth } from '@angular/fire/auth';
 import { User } from './models/user.model';
 import { 
   IonApp, 
@@ -41,12 +42,13 @@ import { LanguageSelectorComponent } from "./components/language-selector/langua
     IonIcon,
     IonLabel,
     TranslatePipe,
-    LanguageSelectorComponent]
+    LanguageSelectorComponent],
+    
 })
 export class AppComponent implements OnInit {
   currentUser: User | null = null;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService,private auth: Auth) {}
 
   ngOnInit() {
     this.authService.user$.subscribe(user => {
