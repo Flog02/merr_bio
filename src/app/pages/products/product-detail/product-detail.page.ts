@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import {
+  
     IonSpinner,
   IonHeader,
   IonToolbar,
@@ -46,7 +48,8 @@ import { Timestamp } from '@angular/fire/firestore';
     IonContent,
     IonButton,
     IonButtons,
-    IonBackButton
+    IonBackButton,
+    IonIcon
 ],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar class="header-transparent">
@@ -77,6 +80,10 @@ import { Timestamp } from '@angular/fire/firestore';
           <div class="farmer-location" *ngIf="farmer.location">{{ farmer.location }}</div>
         </div>
       </div>
+      <ion-button expand="block" fill="outline" *ngIf="currentUser?.role === 'customer'" (click)="startChat()">
+  <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+  Message Farmer
+</ion-button>
       
       <div class="product-details">
         <h3>{{ 'DESCRIPTION' | translate }}</h3>
@@ -467,7 +474,8 @@ export class ProductDetailPage implements OnInit {
     private userService: UserService,
     private purchaseRequestService: PurchaseRequestService,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -506,6 +514,13 @@ export class ProductDetailPage implements OnInit {
 
   selectQuantity(qty: number) {
     this.selectedQuantity = qty;
+  }
+
+  startChat() {
+    if (!this.farmer || !this.currentUser) return;
+    
+    // Navigate to chat with this farmer
+    this.router.navigate([`/customer/chats/${this.farmer.uid}`]);
   }
 
   async requestToBuy() {
@@ -607,10 +622,5 @@ export class ProductDetailPage implements OnInit {
     });
   }
 
-  startChat() {
-    if (!this.product || !this.currentUser || !this.farmer) return;
-    
-    // For now, just show a message
-    this.showErrorToast('Chat feature coming soon!');
-  }
+
 }

@@ -18,8 +18,7 @@ import {
   IonIcon,
   IonLabel,
   IonButton,
-  IonButtons
-} from '@ionic/angular/standalone';
+  IonButtons, IonFooter } from '@ionic/angular/standalone';
 import { RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from "./pipes/translate.pipe";
 import { LanguageSelectorComponent } from "./components/language-selector/language-selector.component";
@@ -28,7 +27,7 @@ import { LanguageSelectorComponent } from "./components/language-selector/langua
   selector: 'app-root',
   templateUrl: 'app.component.html',
   standalone: true,
-  imports: [RouterLinkActive,
+  imports: [IonFooter, RouterLinkActive,
     CommonModule,
     RouterLink,
     IonApp,

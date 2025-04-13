@@ -56,10 +56,16 @@
                 <ion-label>{{ 'MY_REQUESTS' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/chats" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
-                <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
-                <ion-label>{{ 'MESSAGES' | translate }}</ion-label>
-              </ion-item>
+              <ion-item 
+              *ngIf="currentUser?.role === 'customer'" 
+              routerLink="/customer/chats" 
+              routerDirection="root" 
+              lines="none" 
+              detail="false" 
+              routerLinkActive="selected">
+              <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
+              <ion-label>{{ 'MESSAGES' | translate }}</ion-label>
+            </ion-item>
             </ng-container>
             
             <!-- Farmer options -->
@@ -83,10 +89,16 @@
                 <ion-label>{{ 'PURCHASE_REQUESTS' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/chats" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
-                <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
-                <ion-label>{{ 'MESSAGES' | translate }}</ion-label>
-              </ion-item>
+              <ion-item 
+              *ngIf="currentUser?.role === 'farmer'" 
+              routerLink="/farmer/chats" 
+              routerDirection="root" 
+              lines="none" 
+              detail="false" 
+              routerLinkActive="selected">
+              <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
+              <ion-label>{{ 'MESSAGES' | translate }}</ion-label>
+            </ion-item>
             </ng-container>
             
             <!-- Admin options -->
@@ -160,11 +172,22 @@ routerLinkActive="selected">
           
           <!-- Language selector -->
           <div class="menu-section">
-            <div class="menu-section-title">{{ 'SETTINGS' | translate }}</div>
+            
+            <div class="menu-section-title">{{ 'SETTINGS' | translate }}          <ion-icon slot="start" name="settings-outline"></ion-icon>
+            </div>
           </div>
+          
           <app-language-selector></app-language-selector>
+          
         </ion-list>
+       
       </ion-content>
+      <ion-footer class="ion-no-border">
+        <div class="copyright-container">
+          <p class="copyright-text" style="margin-left: 5px;">&copy; 2025 sdi. All rights reserved.</p>
+        </div>
+      </ion-footer>
+      
     </ion-menu>
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>

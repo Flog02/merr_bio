@@ -1,5 +1,8 @@
-import { Routes } from '@angular/router';
+import { Router, Routes } from '@angular/router';
 import { authGuard, roleGuard } from './guards/auth.guard';
+import { inject } from '@angular/core';
+import { take, tap } from 'rxjs';
+import { AuthService } from './services/auth.service';
 
 export const routes: Routes = [
   {
@@ -45,14 +48,10 @@ export const routes: Routes = [
     data: { roles: ['admin'] },
     loadChildren: () => import('./pages/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
-  {
-    path: '**',
-    redirectTo: ''
-  },
+  // Chat routes
   {
     path: 'customer/chats',
     loadComponent: () => import('./pages/chat/chat-list.component').then(m => m.ChatListComponent)
-
   },
   {
     path: 'customer/chats/:userId',
@@ -61,10 +60,48 @@ export const routes: Routes = [
   {
     path: 'farmer/chats',
     loadComponent: () => import('./pages/chat/chat-list.component').then(m => m.ChatListComponent)
-
   },
   {
     path: 'farmer/chats/:userId',
     loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent)
+  },
+  {
+    path: 'chats',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        resolve: {
+          role: () => {
+            const authService = inject(AuthService);
+            const router = inject(Router);
+            
+            authService.user$.pipe(
+              take(1)
+            ).subscribe(user => {
+              if (user) {
+                router.navigate([`/${user.role}/chats`]);
+              } else {
+                router.navigate(['/login']);
+              }
+            });
+            
+            return true;
+          }
+        },
+        loadComponent: () => import('./pages/chat/chat-list.component').then(m => m.ChatListComponent)
+      },
+      {
+        path: ':userId',
+        redirectTo: '/:userId',
+        pathMatch: 'full'
+      }
+    ]
+  }
+  ,
+  
+  {
+    path: '**',
+    redirectTo: ''
   }
 ];

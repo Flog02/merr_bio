@@ -6,7 +6,7 @@ import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../models/user.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-farmer-profile',
   standalone: true,
@@ -30,6 +30,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       <h1>{{ currentUser.displayName || 'Customer' }}</h1>
       <p>{{ currentUser.email }}</p>
     </div>
+    <ion-button expand="block" *ngIf="currentUser?.role === 'customer'" (click)="contactFarmer()">
+  Contact Farmer
+</ion-button>
     
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
       <ion-item>
@@ -273,7 +276,8 @@ export class FarmerProfilePage implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {
     this.createForm();
   }
@@ -299,6 +303,12 @@ export class FarmerProfilePage implements OnInit {
       phoneNumber: [''],
       location: ['']
     });
+  }
+  contactFarmer() {
+    if (!this.currentUser) return;
+    
+    // Navigate to chat with this farmer
+    this.router.navigate([`/customer/chats/${this.currentUser.uid}`]);
   }
 
   onSubmit() {
