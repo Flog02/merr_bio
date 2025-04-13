@@ -15,48 +15,48 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-farmer-requests',
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule, TranslatePipe],
-  template: `
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
-        <ion-title>{{ 'PURCHASE_REQUESTS' | translate }}</ion-title>
-      </ion-toolbar>
-    </ion-header>
+  template: `<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{ 'PURCHASE_REQUESTS' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
 
-    <ion-content>
-      <ion-list>
-        <ion-item-sliding *ngFor="let request of requests$ | async">
-          <ion-item>
-            <ion-label>
-              <h2>{{ getProductName(request.productId) }}</h2>
-              <p>{{ 'QUANTITY' | translate }}: {{ request.quantity }}</p>
-              <p>{{ 'CUSTOMER' | translate }}: {{ getCustomerName(request.customerId) }}</p>
-              <p>{{ request.message }}</p>
-              <p>{{ request.timestamp.toDate() | date:'medium' }}</p>
-            </ion-label>
-            <ion-badge slot="end" color="{{ getBadgeColor(request.status) }}">
-              {{ getStatusText(request.status) | translate }}
-            </ion-badge>
-          </ion-item>
+<ion-content>
+  <ion-list>
+    <ion-item-sliding *ngFor="let request of requests$ | async">
+      <ion-item>
+        <ion-label>
+          <h2>{{ getProductName(request.productId) }}</h2>
+          <p>{{ 'QUANTITY' | translate }}: {{ request.quantity }}</p>
+          <p>{{ 'CUSTOMER' | translate }}: {{ getCustomerName(request.customerId) }}</p>
+          <p>{{ request.message }}</p>
+          <p>{{ request.timestamp.toDate() | date:'medium' }}</p>
+        </ion-label>
+        <ion-badge slot="end" color="{{ getBadgeColor(request.status) }}">
+          {{ getStatusText(request.status) | translate }}
+        </ion-badge>
+      </ion-item>
 
-          <ion-item-options side="end" *ngIf="request.status === 'pending'">
-            <ion-item-option color="success" (click)="updateRequestStatus(request.id!, 'accepted')">
-              <ion-icon slot="icon-only" name="checkmark"></ion-icon>
-            </ion-item-option>
-            <ion-item-option color="danger" (click)="updateRequestStatus(request.id!, 'rejected')">
-              <ion-icon slot="icon-only" name="close"></ion-icon>
-            </ion-item-option>
-          </ion-item-options>
-        </ion-item-sliding>
-      </ion-list>
+      <ion-item-options side="end" *ngIf="request.status === 'pending'">
+        <ion-item-option color="success" (click)="updateRequestStatus(request.id!, 'accepted')">
+          <ion-icon slot="icon-only" name="checkmark"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger" (click)="updateRequestStatus(request.id!, 'rejected')">
+          <ion-icon slot="icon-only" name="close"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
 
-      <div class="ion-text-center ion-padding" *ngIf="(requests$ | async)?.length === 0">
-        <p>{{ 'NO_REQUESTS' | translate }}</p>
-      </div>
-    </ion-content>
-  `
+  <div class="no-requests fade-in " style="    place-items: center;" *ngIf="(requests$ | async)?.length === 0">
+    <ion-icon name="notifications-outline"></ion-icon>
+    <h3>{{ 'NO_REQUESTS_YET' | translate }}</h3>
+    <p>{{ 'NO_REQUESTS' | translate }}</p>
+  </div>
+</ion-content> `
 })
 export class FarmerRequestsPage implements OnInit {
   requests$!: Observable<PurchaseRequest[]>;

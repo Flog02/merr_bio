@@ -35,22 +35,14 @@ import { LanguageSelectorComponent } from "./components/language-selector/langua
     IonRouterOutlet,
     IonSplitPane,
     IonMenu,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonList,
     IonMenuToggle,
     IonItem,
     IonIcon,
     IonLabel,
-    IonButton,
-    IonButtons
-    // Add any other components you need
-    ,
     TranslatePipe,
-    LanguageSelectorComponent
-]
+    LanguageSelectorComponent]
 })
 export class AppComponent implements OnInit {
   currentUser: User | null = null;

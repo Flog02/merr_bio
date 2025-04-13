@@ -37,173 +37,135 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-product-list',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterLink,
+    CommonModule, 
+    RouterLink, 
     ReactiveFormsModule,
     TranslatePipe,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
+    IonHeader, 
+    IonToolbar, 
+    IonTitle, 
+    IonContent, 
     IonSearchbar,
     IonGrid,
     IonRow,
     IonCol,
     IonCard,
     IonCardContent,
+    IonItem,
     IonLabel,
     IonButtons,
+    IonBackButton,
     IonButton,
     IonIcon,
+    IonSegment,
+    IonSegmentButton,
     IonMenuButton,
     IonSkeletonText,
     IonChip
-],
-  template: `<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>{{ 'PRODUCTS' | translate }}</ion-title>
-  </ion-toolbar>
-  
-  <ion-toolbar>
-    <ion-searchbar [formControl]="searchControl" placeholder="{{ 'SEARCH_PRODUCTS' | translate }}" mode="ios" class="product-search"></ion-searchbar>
-  </ion-toolbar>
-</ion-header>
+  ],
+  template: `
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>{{ 'PRODUCTS' | translate }}</ion-title>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar [formControl]="searchControl" placeholder="{{ 'SEARCH_PRODUCTS' | translate }}" animated></ion-searchbar>
+      </ion-toolbar>
+      <ion-toolbar>
+        <div class="categories-scroller">
+          <ion-chip [class.active]="categoryControl.value === 'all'" (click)="categoryControl.setValue('all')">
+            <ion-label>{{ 'ALL' | translate }}</ion-label>
+          </ion-chip>
+          <ion-chip [class.active]="categoryControl.value === 'vegetables'" (click)="categoryControl.setValue('vegetables')">
+            <ion-icon name="leaf"></ion-icon>
+            <ion-label>{{ 'VEGETABLES' | translate }}</ion-label>
+          </ion-chip>
+          <ion-chip [class.active]="categoryControl.value === 'fruits'" (click)="categoryControl.setValue('fruits')">
+            <ion-icon name="nutrition"></ion-icon>
+            <ion-label>{{ 'FRUITS' | translate }}</ion-label>
+          </ion-chip>
+          <ion-chip [class.active]="categoryControl.value === 'dairy'" (click)="categoryControl.setValue('dairy')">
+            <ion-icon name="water"></ion-icon>
+            <ion-label>{{ 'DAIRY' | translate }}</ion-label>
+          </ion-chip>
+          <ion-chip [class.active]="categoryControl.value === 'other'" (click)="categoryControl.setValue('other')">
+            <ion-icon name="grid"></ion-icon>
+            <ion-label>{{ 'OTHER' | translate }}</ion-label>
+          </ion-chip>
+        </div>
+      </ion-toolbar>
+    </ion-header>
 
-<ion-content>
-  <!-- Categories -->
-  <div class="categories-container">
-    <div class="category-button" [class.active]="categoryControl.value === 'all'" (click)="categoryControl.setValue('all')">
-      <div class="category-icon">
-        <ion-icon name="apps-outline"></ion-icon>
-      </div>
-      <div class="category-name">{{ 'ALL' | translate }}</div>
-    </div>
-    
-    <div class="category-button" [class.active]="categoryControl.value === 'vegetables'" (click)="categoryControl.setValue('vegetables')">
-      <div class="category-icon">
-        <ion-icon name="leaf-outline"></ion-icon>
-      </div>
-      <div class="category-name">{{ 'VEGETABLES' | translate }}</div>
-    </div>
-    
-    <div class="category-button" [class.active]="categoryControl.value === 'fruits'" (click)="categoryControl.setValue('fruits')">
-      <div class="category-icon">
-        <ion-icon name="nutrition-outline"></ion-icon>
-      </div>
-      <div class="category-name">{{ 'FRUITS' | translate }}</div>
-    </div>
-    
-    <div class="category-button" [class.active]="categoryControl.value === 'dairy'" (click)="categoryControl.setValue('dairy')">
-      <div class="category-icon">
-        <ion-icon name="water-outline"></ion-icon>
-      </div>
-      <div class="category-name">{{ 'DAIRY' | translate }}</div>
-    </div>
-    
-    <div class="category-button" [class.active]="categoryControl.value === 'honey'" (click)="categoryControl.setValue('honey')">
-      <div class="category-icon">
-        <ion-icon name="color-fill-outline"></ion-icon>
-      </div>
-      <div class="category-name">{{ 'HONEY' | translate }}</div>
-    </div>
-    
-    <div class="category-button" [class.active]="categoryControl.value === 'other'" (click)="categoryControl.setValue('other')">
-      <div class="category-icon">
-        <ion-icon name="grid-outline"></ion-icon>
-      </div>
-      <div class="category-name">{{ 'OTHER' | translate }}</div>
-    </div>
-  </div>
+    <ion-content>
+      <ng-container *ngIf="(filteredProducts$ | async) as products; else loading">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-sm="6" size-md="4" size-lg="3" *ngFor="let product of products">
+              <ion-card class="product-card" [routerLink]="['/products', product.id]">
+                <div class="card-img-container">
+                  <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+                </div>
+                <ion-card-content>
+                  <div class="product-title">{{ product.name }}</div>
+                  <div class="price">{{ product.price }} ALL <span class="unit">/ {{ product.unit }}</span></div>
+                  <div class="availability">
+                    {{ product.quantity }} {{ product.unit }} {{ 'AVAILABLE' | translate }}
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
 
-  <!-- Products Grid -->
-  <div class="section-header">
-    <h2>{{ 'PRODUCTS' | translate }}</h2>
-  </div>
+        <div *ngIf="products?.length === 0" class="no-products ion-text-center ion-padding">
+          <ion-icon name="basket-outline" size="large"></ion-icon>
+          <h3>{{ 'NO_PRODUCTS_FOUND' | translate }}</h3>
+          <p>{{ 'TRY_DIFFERENT_FILTER' | translate }}</p>
+        </div>
+      </ng-container>
 
-  <ng-container *ngIf="(filteredProducts$ | async) as products; else loading">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="6" *ngFor="let product of products">
-          <ion-card class="product-card" [routerLink]="['/products', product.id]">
-            <div class="card-img-container">
-              <img src="assets/images/product-placeholder.jpg" alt="{{ product.name }}">
-            </div>
-            <ion-card-content>
-              <div class="product-title">{{ product.name }}</div>
-              <div class="price">{{ product.price }} ALL<span class="unit">/{{ product.unit }}</span></div>
-              <div class="availability">{{ product.quantity }} {{ product.unit }} {{ 'AVAILABLE' | translate }}</div>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-
-    <div *ngIf="products?.length === 0" class="empty-state">
-      <ion-icon name="basket-outline"></ion-icon>
-      <h3>{{ 'NO_PRODUCTS_FOUND' | translate }}</h3>
-      <p>{{ 'TRY_DIFFERENT_FILTER' | translate }}</p>
-      <ion-button fill="outline" (click)="categoryControl.setValue('all')">
-        {{ 'VIEW_ALL_PRODUCTS' | translate }}
-      </ion-button>
-    </div>
-  </ng-container>
-
-  <ng-template #loading>
-    <ion-grid>
-      <ion-row>
-        <ion-col size="6" *ngFor="let _ of [1,2,3,4]">
-          <ion-card class="skeleton-card">
-            <ion-skeleton-text animated class="skeleton-image"></ion-skeleton-text>
-            <ion-card-content>
-              <ion-skeleton-text animated style="width: 85%; height: 16px; margin-bottom: 8px;"></ion-skeleton-text>
-              <ion-skeleton-text animated style="width: 60%; height: 16px; margin-bottom: 8px;"></ion-skeleton-text>
-              <ion-skeleton-text animated style="width: 40%; height: 14px;"></ion-skeleton-text>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ng-template>
-</ion-content>`,
-  styles: [`/* Additional styles for product list page */
-
-    .custom-searchbar {
-      --box-shadow: none;
-      --border-radius: var(--border-radius-lg);
-      --background: var(--ion-color-light);
-      --color: var(--ion-color-dark);
-      --placeholder-color: var(--ion-color-medium);
-      --icon-color: var(--ion-color-primary);
-      margin: 0 var(--spacing-sm);
-      padding: 0;
-    }
-    
+      <ng-template #loading>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-sm="6" size-md="4" size-lg="3" *ngFor="let _ of [1,2,3,4,5,6]">
+              <ion-card class="product-card">
+                <ion-skeleton-text animated style="width: 100%; height: 160px;"></ion-skeleton-text>
+                <ion-card-content>
+                  <ion-skeleton-text animated style="width: 80%; height: 20px; margin-bottom: 10px;"></ion-skeleton-text>
+                  <ion-skeleton-text animated style="width: 50%; height: 20px; margin-bottom: 10px;"></ion-skeleton-text>
+                  <ion-skeleton-text animated style="width: 40%; height: 16px;"></ion-skeleton-text>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ng-template>
+    </ion-content>
+  `,
+  styles: [`
     .categories-scroller {
       display: flex;
       overflow-x: auto;
-      padding: var(--spacing-sm) var(--spacing-md);
+      padding: 10px 16px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      
       &::-webkit-scrollbar {
         display: none;
       }
       
       ion-chip {
-        margin-right: var(--spacing-sm);
+        margin-right: 8px;
         flex: 0 0 auto;
-        --background: rgba(var(--ion-color-light-rgb), 0.7);
+        --background: #f5f5f5;
         --color: var(--ion-color-dark);
-        font-weight: 500;
-        transition: all var(--transition-fast);
         
         &.active {
           --background: var(--ion-color-primary);
           --color: white;
-          box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.25);
+          font-weight: 500;
           
           ion-icon {
             color: white;
@@ -212,54 +174,32 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         
         ion-icon {
           color: var(--ion-color-primary);
-          font-size: 16px;
           margin-right: 4px;
-        }
-        
-        &:active {
-          transform: scale(0.95);
         }
       }
     }
     
     .product-card {
-      margin: var(--spacing-sm);
-      border-radius: var(--border-radius-lg);
+      margin: 12px 8px;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: var(--box-shadow-soft);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       height: 100%;
-      transition: transform var(--transition-medium), box-shadow var(--transition-medium);
-      background: white;
+      transition: transform 0.2s;
       
       &:active {
         transform: scale(0.98);
       }
       
       .card-img-container {
-        height: 180px;
+        height: 160px;
         overflow: hidden;
-        position: relative;
         
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform var(--transition-medium);
-        }
-        
-        .product-category-tag {
-          position: absolute;
-          top: var(--spacing-sm);
-          right: var(--spacing-sm);
-          background: rgba(var(--ion-color-primary-rgb), 0.9);
-          color: white;
-          font-size: 0.7rem;
-          font-weight: 600;
-          padding: 4px 8px;
-          border-radius: 100px;
-          text-transform: capitalize;
-          letter-spacing: 0.5px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s;
         }
       }
       
@@ -267,30 +207,21 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         transform: scale(1.05);
       }
       
-      ion-card-content {
-        padding: var(--spacing-md);
-      }
-      
       .product-title {
-        font-size: 1.05rem;
+        font-size: 16px;
         font-weight: 600;
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: 8px;
         color: var(--ion-color-dark);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;  
-        overflow: hidden;
-        min-height: 42px;
       }
       
       .price {
-        font-size: 1.2rem;
+        font-size: 18px;
         font-weight: 700;
         color: var(--ion-color-primary);
-        margin-bottom: var(--spacing-xs);
+        margin-bottom: 6px;
         
         .unit {
-          font-size: 0.9rem;
+          font-size: 14px;
           font-weight: 400;
           color: var(--ion-text-color);
           opacity: 0.7;
@@ -298,55 +229,30 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       }
       
       .availability {
-        font-size: 0.9rem;
-        color: var(--ion-color-medium);
-      }
-    }
-    
-    .skeleton-card {
-      ion-skeleton-text {
-        border-radius: var(--border-radius-md);
+        font-size: 14px;
+        color: var(--ion-text-color);
+        opacity: 0.7;
       }
     }
     
     .no-products {
-      padding: var(--spacing-xl) var(--spacing-md);
-      max-width: 500px;
-      margin: 0 auto;
+      padding-top: 64px;
       
       ion-icon {
         font-size: 64px;
         color: var(--ion-color-medium);
-        margin-bottom: var(--spacing-md);
       }
       
       h3 {
-        margin-top: var(--spacing-md);
+        margin-top: 16px;
         font-weight: 600;
-        color: var(--ion-color-dark);
-        font-size: 1.3rem;
       }
       
       p {
         color: var(--ion-color-medium);
-        margin: var(--spacing-md) auto;
-        max-width: 300px;
-        font-size: 1rem;
-      }
-      
-      ion-button {
-        margin-top: var(--spacing-md);
-        --border-radius: var(--border-radius-md);
-        font-weight: 500;
       }
     }
-    
-    /* Animation delays for list items */
-    @for $i from 1 through 20 {
-      .fade-in:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.05}s;
-      }
-    } `]
+  `]
 })
 export class ProductListPage implements OnInit {
   products$!: Observable<Product[]>;

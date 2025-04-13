@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -22,34 +22,28 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 
     <ion-content class="ion-padding">
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <ion-item>
+        <!-- Email field with error message -->
+        <ion-item [class.ion-invalid]="isEmailInvalid()">
           <ion-label position="floating">{{ 'EMAIL' | translate }}</ion-label>
           <ion-input type="email" formControlName="email"></ion-input>
-          <ion-note slot="error" *ngIf="errorControl['email'].touched && errorControl['email'].errors?.['required']">
-            {{ 'EMAIL_REQUIRED' | translate }}
-          </ion-note>
-          <ion-note slot="error" *ngIf="errorControl['email'].touched && errorControl['email'].errors?.['email']">
-            {{ 'EMAIL_INVALID' | translate }}
-          </ion-note>
         </ion-item>
+        <div class="error-message" *ngIf="isEmailInvalid()">
+          {{ 'EMAIL_INVALID' | translate }}
+        </div>
 
-        <ion-item>
+        <!-- Password field with error message -->
+        <ion-item [class.ion-invalid]="isPasswordTooShort()">
           <ion-label position="floating">{{ 'PASSWORD' | translate }}</ion-label>
           <ion-input type="password" formControlName="password"></ion-input>
-          <ion-note slot="error" *ngIf="errorControl['password'].touched && errorControl['password'].errors?.['required']">
-            {{ 'PASSWORD_REQUIRED' | translate }}
-          </ion-note>
-          <ion-note slot="error" *ngIf="errorControl['password'].touched && errorControl['password'].errors?.['minlength']">
-            {{ 'PASSWORD_MIN_LENGTH' | translate }}
-          </ion-note>
         </ion-item>
+        <div class="error-message" *ngIf="isPasswordTooShort()">
+          {{ 'PASSWORD_MIN_LENGTH' | translate }}
+        </div>
 
+        <!-- Other fields remain unchanged -->
         <ion-item>
           <ion-label position="floating">{{ 'NAME' | translate }}</ion-label>
           <ion-input type="text" formControlName="displayName"></ion-input>
-          <ion-note slot="error" *ngIf="errorControl['displayName'].touched && errorControl['displayName'].errors?.['required']">
-            {{ 'NAME_REQUIRED' | translate }}
-          </ion-note>
         </ion-item>
 
         <ion-item>
@@ -84,9 +78,20 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       </form>
 
       <div class="ion-text-center ion-padding-top">
-        <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }} <a routerLink="/login">{{ 'LOGIN' | translate }}</a></p>
+        <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }} <a href="/login">{{ 'LOGIN' | translate }}</a></p>
       </div>
     </ion-content>
+  `,
+  styles: `
+    .error-message {
+      color: var(--ion-color-danger);
+      font-size: 12px;
+      margin: 5px 0 15px 16px;
+    }
+
+    ion-item.ion-invalid {
+      --highlight-color: var(--ion-color-danger);
+    }
   `
 })
 export class RegisterPage {
@@ -95,7 +100,8 @@ export class RegisterPage {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {
     this.registerForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -111,15 +117,40 @@ export class RegisterPage {
     return this.registerForm.controls;
   }
 
-  onSubmit() {
+  // Simple methods to check specific validation errors
+  isEmailInvalid(): boolean {
+    const control = this.registerForm.get('email');
+    return control?.touched && (control?.hasError('required') || control?.hasError('email')) || false;
+  }
+
+  isPasswordTooShort(): boolean {
+    const control = this.registerForm.get('password');
+    return control?.touched && control?.hasError('minlength') || false;
+  }
+
+  async onSubmit() {
     if (this.registerForm.invalid) {
+      // Mark all fields as touched to trigger validation error messages
+      Object.keys(this.registerForm.controls).forEach(key => {
+        const control = this.registerForm.get(key);
+        control?.markAsTouched();
+      });
+      
+      // Show a toast with an error message
+      const toast = await this.toastController.create({
+        message: 'Please fix the form errors before submitting',
+        duration: 2000,
+        color: 'danger',
+        position: 'bottom'
+      });
+      
+      await toast.present();
       return;
     }
 
     const { email, password, displayName, phoneNumber, location, role } = this.registerForm.value;
 
     this.authService.register(email, password, role, displayName, phoneNumber, location)
-    // phoneNumber, location
       .then(() => {
         // Successfully registered
         this.router.navigate(['/']);
@@ -127,6 +158,18 @@ export class RegisterPage {
       .catch(error => {
         console.error('Registration error', error);
         // Handle registration error (show toast or alert)
+        this.showErrorToast(error.message);
       });
+  }
+  
+  async showErrorToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message || 'Registration failed. Please try again.',
+      duration: 3000,
+      color: 'danger',
+      position: 'bottom'
+    });
+    
+    await toast.present();
   }
 }

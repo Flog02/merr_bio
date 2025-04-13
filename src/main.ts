@@ -24,7 +24,7 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {search,water, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward } from 'ionicons/icons';
+import {search,water, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline } from 'ionicons/icons';
 
 addIcons({
   home,
@@ -41,4 +41,25 @@ addIcons({
   'list-circle': listCircle,
   shield,
   'log-out': logOut,
+  'home-outline': homeOutline,
+  'grid-outline': gridOutline,
+  'log-in-outline': logInOutline,
+  'person-add-outline': personAddOutline,
+  'person-outline':personOutline,
+  'chatbubbles-outline':chatbubblesOutline,
+  'log-out-outline':logOutOutline,
+  'speedometer-outline':speedometerOutline,
+  'cart-outline':cartOutline,
+  'cube-outline':cubeOutline,
+  people,
+  trash,
+  'people-outline':peopleOutline,
+  'shield-outline':shieldOutline,
+  'trash-outline':trashOutline,
+  'list-circle-outline':listCircleOutline,
+  'add-circle-outline':addCircleOutline,
+  'checkmark-circle-outline':checkmarkCircleOutline,
+  'checkmark':checkmark,
+  'notifications-outline':notificationsOutline
+  // 'hield-outline':hieldOutline
 });

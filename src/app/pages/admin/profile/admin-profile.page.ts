@@ -8,7 +8,7 @@ import { User } from '../../../models/user.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
-  selector: 'app-customer-profile',
+  selector: 'app-admin-profile',
   standalone: true,
   imports: [IonicModule, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
@@ -266,7 +266,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     }
   }`
 })
-export class CustomerProfilePage implements OnInit {
+export class AdminProfilePage implements OnInit {
   profileForm!: FormGroup;
   currentUser: User | null = null;
 

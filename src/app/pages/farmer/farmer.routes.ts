@@ -21,5 +21,9 @@ export const FARMER_ROUTES: Routes = [
   {
     path: 'requests',
     loadComponent: () => import('./requests/farmer-requests.page').then(m => m.FarmerRequestsPage)
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./profile/farmer-profile.page').then(m => m.FarmerProfilePage)
   }
 ];

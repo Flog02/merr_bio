@@ -10,4 +10,6 @@ export interface PurchaseRequest {
   status: 'pending' | 'accepted' | 'rejected';
   timestamp: Timestamp;
   message?: string;
+  images?: string[];
+
 }

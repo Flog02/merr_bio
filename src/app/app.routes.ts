@@ -49,5 +49,23 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: ''
+  },
+  {
+    path: 'customer/chats',
+    loadComponent: () => import('./pages/chat/chat-list.component').then(m => m.ChatListComponent)
+
+  },
+  {
+    path: 'customer/chats/:userId',
+    loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent)
+  },
+  {
+    path: 'farmer/chats',
+    loadComponent: () => import('./pages/chat/chat-list.component').then(m => m.ChatListComponent)
+
+  },
+  {
+    path: 'farmer/chats/:userId',
+    loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent)
   }
 ];

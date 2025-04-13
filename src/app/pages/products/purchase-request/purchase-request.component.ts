@@ -12,155 +12,216 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-purchase-request',
   standalone: true,
   imports: [IonicModule, CommonModule, ReactiveFormsModule, TranslatePipe],
-  template: `
-    <ion-header class="ion-no-border">
-      <ion-toolbar color="primary">
-        <ion-title>{{ 'REQUEST_TO_PURCHASE' | translate }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="dismiss()">
-            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+  template: `<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>{{ 'REQUEST_TO_PURCHASE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding fade-in">
+  <ion-card class="product-summary-card slide-up">
+    <ion-card-header>
+      <ion-card-title>{{ product.name }}</ion-card-title>
+      <ion-card-subtitle>{{ 'PRODUCT_DETAILS' | translate }}</ion-card-subtitle>
+    </ion-card-header>
     
-    <ion-content class="ion-padding fade-in">
-      <ion-card class="product-summary-card slide-up">
-        <ion-card-header>
-          <ion-card-title>{{ product.name }}</ion-card-title>
-          <ion-card-subtitle>{{ 'PRODUCT_DETAILS' | translate }}</ion-card-subtitle>
-        </ion-card-header>
-        
-        <ion-card-content>
-          <div class="product-meta">
-            <div class="meta-item">
-              <ion-icon name="cube-outline"></ion-icon>
-              <span>{{ 'AVAILABLE' | translate }}: <strong>{{ product.quantity }} {{ product.unit }}</strong></span>
-            </div>
-            <div class="meta-item">
-              <ion-icon name="pricetag-outline"></ion-icon>
-              <span>{{ 'PRICE' | translate }}: <strong>{{ product.price }} ALL {{ 'PER' | translate }} {{ product.unit }}</strong></span>
-            </div>
+    <ion-card-content>
+      <div class="product-meta">
+        <div class="meta-item">
+          <ion-icon name="cube-outline"></ion-icon>
+          <span>{{ 'AVAILABLE' | translate }}: <strong>{{ product.quantity }} {{ product.unit }}</strong></span>
+        </div>
+        <div class="meta-item">
+          <ion-icon name="pricetag-outline"></ion-icon>
+          <span>{{ 'PRICE' | translate }}: <strong>{{ product.price }} ALL {{ 'PER' | translate }} {{ product.unit }}</strong></span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  
+  <ion-card class="form-card scale-in">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="cart-outline"></ion-icon>
+        {{ 'YOUR_ORDER' | translate }}
+      </ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <form [formGroup]="requestForm" (ngSubmit)="onSubmit()">
+        <div class="quantity-selector">
+          <ion-label>{{ 'QUANTITY' | translate }} ({{ product.unit }})</ion-label>
+          
+          <div class="quantity-input">
+            <ion-button fill="clear" (click)="decrementQuantity()" [disabled]="requestForm.get('quantity')?.value <= 1">
+              <ion-icon name="remove-circle-outline"></ion-icon>
+            </ion-button>
+            
+            <ion-input type="number" formControlName="quantity" inputmode="numeric" min="1" [max]="product.quantity"></ion-input>
+            
+            <ion-button fill="clear" (click)="incrementQuantity()" [disabled]="requestForm.get('quantity')?.value >= product.quantity">
+              <ion-icon name="add-circle-outline"></ion-icon>
+            </ion-button>
           </div>
-        </ion-card-content>
-      </ion-card>
-      
-      <ion-card class="form-card scale-in">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="cart-outline"></ion-icon>
-            {{ 'YOUR_ORDER' | translate }}
-          </ion-card-title>
-        </ion-card-header>
+          
+          <ion-note class="error-message" *ngIf="requestForm.get('quantity')?.touched && requestForm.get('quantity')?.errors?.['required']">
+            {{ 'QUANTITY_REQUIRED' | translate }}
+          </ion-note>
+          <ion-note class="error-message" *ngIf="requestForm.get('quantity')?.touched && requestForm.get('quantity')?.errors?.['min']">
+            {{ 'QUANTITY_MIN_VALUE' | translate }}
+          </ion-note>
+          <ion-note class="error-message" *ngIf="requestForm.get('quantity')?.touched && requestForm.get('quantity')?.errors?.['max']">
+            {{ 'CANNOT_EXCEED_AVAILABLE' | translate }}
+          </ion-note>
+        </div>
         
-        <ion-card-content>
-          <form [formGroup]="requestForm" (ngSubmit)="onSubmit()">
-            <div class="quantity-selector">
-              <ion-label>{{ 'QUANTITY' | translate }} ({{ product.unit }})</ion-label>
-              
-              <div class="quantity-input">
-                <ion-button fill="clear" (click)="decrementQuantity()" [disabled]="requestForm.get('quantity')?.value <= 1">
-                  <ion-icon name="remove-circle-outline"></ion-icon>
-                </ion-button>
-                
-                <ion-input type="number" formControlName="quantity" inputmode="numeric" min="1" [max]="product.quantity"></ion-input>
-                
-                <ion-button fill="clear" (click)="incrementQuantity()" [disabled]="requestForm.get('quantity')?.value >= product.quantity">
-                  <ion-icon name="add-circle-outline"></ion-icon>
-                </ion-button>
-              </div>
-              
-              <ion-note class="error-message" *ngIf="requestForm.get('quantity')?.touched && requestForm.get('quantity')?.errors?.['required']">
-                {{ 'QUANTITY_REQUIRED' | translate }}
-              </ion-note>
-              <ion-note class="error-message" *ngIf="requestForm.get('quantity')?.touched && requestForm.get('quantity')?.errors?.['min']">
-                {{ 'QUANTITY_MIN_VALUE' | translate }}
-              </ion-note>
-              <ion-note class="error-message" *ngIf="requestForm.get('quantity')?.touched && requestForm.get('quantity')?.errors?.['max']">
-                {{ 'CANNOT_EXCEED_AVAILABLE' | translate }}
-              </ion-note>
-            </div>
-            
-            <div class="order-summary" *ngIf="requestForm.get('quantity')?.valid">
-              <div class="summary-item">
-                <span>{{ 'TOTAL_QUANTITY' | translate }}</span>
-                <strong>{{ requestForm.get('quantity')?.value }} {{ product.unit }}</strong>
-              </div>
-              <div class="summary-item">
-                <span>{{ 'TOTAL_PRICE' | translate }}</span>
-                <strong>{{ requestForm.get('quantity')?.value * product.price }} ALL</strong>
-              </div>
-            </div>
-            
-            <div class="message-area">
-              <ion-label>{{ 'MESSAGE_TO_FARMER' | translate }} ({{ 'OPTIONAL' | translate }})</ion-label>
-              <ion-textarea 
-                formControlName="message" 
-                rows="3" 
-                placeholder="{{ 'MESSAGE_PLACEHOLDER' | translate }}"
-                class="message-input">
-              </ion-textarea>
-            </div>
-            
-            <div class="button-group">
-              <ion-button expand="block" fill="outline" (click)="dismiss()">
-                {{ 'CANCEL' | translate }}
-              </ion-button>
-              <ion-button expand="block" type="submit" [disabled]="!requestForm.valid">
-                <ion-icon slot="start" name="send-outline"></ion-icon>
-                {{ 'SEND_REQUEST' | translate }}
-              </ion-button>
-            </div>
-          </form>
-        </ion-card-content>
-      </ion-card>
-    </ion-content>
-  `,
-  styles: [`
-    ion-card {
-      margin: var(--spacing-md);
-      border-radius: var(--border-radius-lg);
-      box-shadow: var(--box-shadow-soft);
-    }
-    
-    ion-card-header {
-      padding-bottom: 0;
-    }
-    
-    ion-card-title {
-      display: flex;
-      align-items: center;
-      font-size: 1.2rem;
-      
-      ion-icon {
-        margin-right: 8px;
-        color: var(--ion-color-primary);
-        font-size: 1.3rem;
+        <div class="order-summary" *ngIf="requestForm.get('quantity')?.valid">
+          <div class="summary-item">
+            <span>{{ 'TOTAL_QUANTITY' | translate }}</span>
+            <strong>{{ requestForm.get('quantity')?.value }} {{ product.unit }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>{{ 'TOTAL_PRICE' | translate }}</span>
+            <strong>{{ requestForm.get('quantity')?.value * product.price }} ALL</strong>
+          </div>
+        </div>
+        
+        <div class="message-area">
+          <ion-label>{{ 'MESSAGE_TO_FARMER' | translate }} ({{ 'OPTIONAL' | translate }})</ion-label>
+          <ion-textarea 
+            formControlName="message" 
+            rows="3" 
+            placeholder="{{ 'MESSAGE_PLACEHOLDER' | translate }}"
+            class="message-input">
+          </ion-textarea>
+        </div>
+        
+        <div class="button-group">
+          <ion-button expand="block" fill="outline" (click)="dismiss()" class="button-outline">
+            {{ 'CANCEL' | translate }}
+          </ion-button>
+          <ion-button expand="block" type="submit" [disabled]="!requestForm.valid" class="button-solid">
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            {{ 'SEND_REQUEST' | translate }}
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>`,
+  styles: [`/* Purchase request component styles with Ancker-inspired elegant design */
+
+    ion-header {
+      ion-toolbar {
+        --background: var(--ion-color-primary);
+        --color: var(--text-light);
+        
+        ion-title {
+          font-family: 'Playfair Display', serif;
+          font-weight: 600;
+          font-size: 1.2rem;
+        }
+        
+        ion-button {
+          --color: var(--text-light);
+        }
       }
     }
     
-    .product-meta {
-      margin-top: var(--spacing-sm);
+    ion-content {
+      --background: var(--background-light);
+    }
+    
+    .product-summary-card {
+      margin: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--box-shadow-light);
+      overflow: hidden;
+      background: white;
       
-      .meta-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: var(--spacing-sm);
+      ion-card-header {
+        padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
         
-        ion-icon {
-          color: var(--ion-color-primary);
-          font-size: 1.2rem;
-          margin-right: var(--spacing-sm);
+        ion-card-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.3rem;
+          font-weight: 600;
+          color: #222222;
         }
         
-        span {
-          color: var(--ion-color-dark);
-          font-size: 0.95rem;
+        ion-card-subtitle {
+          font-size: 0.9rem;
+          color: var(--ion-color-medium);
+          font-family: 'Poppins', sans-serif;
+          margin-top: 4px;
+        }
+      }
+      
+      ion-card-content {
+        padding: var(--spacing-md);
+      }
+      
+      .product-meta {
+        .meta-item {
+          display: flex;
+          align-items: center;
+          margin-bottom: var(--spacing-sm);
+          font-family: 'Poppins', sans-serif;
           
-          strong {
-            font-weight: 600;
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          ion-icon {
+            color: var(--ion-color-primary);
+            font-size: 1.2rem;
+            margin-right: var(--spacing-sm);
+          }
+          
+          span {
+            color: var(--ion-color-dark);
+            font-size: 0.95rem;
+            
+            strong {
+              font-weight: 600;
+            }
           }
         }
+      }
+    }
+    
+    .form-card {
+      margin: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--box-shadow-light);
+      background: white;
+      
+      ion-card-header {
+        padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+        
+        ion-card-title {
+          display: flex;
+          align-items: center;
+          font-family: 'Playfair Display', serif;
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: #222222;
+          
+          ion-icon {
+            margin-right: 10px;
+            color: var(--ion-color-primary);
+            font-size: 1.3rem;
+          }
+        }
+      }
+      
+      ion-card-content {
+        padding: var(--spacing-md);
       }
     }
     
@@ -172,6 +233,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         margin-bottom: var(--spacing-sm);
         font-weight: 500;
         color: var(--ion-color-dark);
+        font-family: 'Poppins', sans-serif;
       }
       
       .quantity-input {
@@ -184,10 +246,15 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         ion-button {
           --color: var(--ion-color-primary);
           margin: 0;
-          height: 46px;
+          height: 48px;
           
           ion-icon {
-            font-size: 24px;
+            font-size: 26px;
+            transition: var(--transition);
+          }
+          
+          &:active ion-icon {
+            transform: scale(0.9);
           }
         }
         
@@ -196,10 +263,11 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
           --padding-end: 0;
           text-align: center;
           font-weight: 600;
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           --background: transparent;
           width: 100%;
           max-width: 80px;
+          font-family: 'Poppins', sans-serif;
         }
       }
       
@@ -208,6 +276,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         font-size: 0.8rem;
         display: block;
         margin-top: var(--spacing-xs);
+        font-family: 'Poppins', sans-serif;
       }
     }
     
@@ -222,6 +291,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         justify-content: space-between;
         margin-bottom: var(--spacing-xs);
         font-size: 0.95rem;
+        font-family: 'Poppins', sans-serif;
         
         &:last-child {
           margin-bottom: 0;
@@ -252,6 +322,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         margin-bottom: var(--spacing-sm);
         font-weight: 500;
         color: var(--ion-color-dark);
+        font-family: 'Poppins', sans-serif;
       }
       
       .message-input {
@@ -260,6 +331,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         --padding-end: var(--spacing-md);
         --padding-top: var(--spacing-sm);
         --border-radius: var(--border-radius-md);
+        font-family: 'Poppins', sans-serif;
       }
     }
     
@@ -271,11 +343,70 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         flex: 1;
         margin: 0;
         --border-radius: var(--border-radius-md);
-        height: 46px;
+        height: 48px;
         font-weight: 600;
+        font-family: 'Poppins', sans-serif;
+        letter-spacing: 0.3px;
+        
+        &.button-outline {
+          --border-color: var(--ion-color-medium);
+          --color: var(--ion-color-dark);
+          
+          &:hover {
+            --border-color: var(--ion-color-primary);
+            --color: var(--ion-color-primary);
+          }
+        }
+        
+        &.button-solid {
+          --background: var(--ion-color-primary);
+          
+          &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
+            opacity: 0;
+            transition: var(--transition);
+          }
+          
+          &:hover::before {
+            opacity: 1;
+          }
+        }
       }
     }
-  `]
+    
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    
+    .slide-up {
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    .scale-in {
+      animation: scaleIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }`]
 })
 export class PurchaseRequestComponent implements OnInit {
   @Input() product!: Product;

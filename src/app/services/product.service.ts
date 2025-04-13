@@ -1,131 +1,87 @@
-// src/app/services/product.service.ts
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { 
   Firestore, 
   collection, 
-  collectionData, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
   doc, 
-  docData, 
-  query, 
+  collectionData, 
   where, 
-  orderBy,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  DocumentReference
+  query, 
+  getDoc, 
+  orderBy
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, from, map } from 'rxjs';
 import { Product } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  private firestore: Firestore = inject(Firestore);
-  
-  constructor() {}
-  
-  // Get approved products ordered by creation date
+  constructor(private firestore: Firestore) {}
+
+
+
+  // Add a new product
+  addProduct(product: Omit<Product, 'id'>): Observable<string> {
+    const productsRef = collection(this.firestore, 'products');
+    return from(addDoc(productsRef, product)).pipe(
+      map(docRef => docRef.id)
+    );
+  }
+
+  // Get all products
   getProducts(): Observable<Product[]> {
     const productsRef = collection(this.firestore, 'products');
-    const q = query(
-      productsRef, 
-      where('approved', '==', true),
-      orderBy('createdAt', 'desc')
-    );
-    
+    // Only fetch approved products for regular users
+    const q = query(productsRef, where('approved', '==', true), orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
-  
-  // Get all products for admin (no filtering)
+
+  // Get products by farmer
+  getProductsByFarmer(farmerId: string): Observable<Product[]> {
+    const productsRef = collection(this.firestore, 'products');
+    const q = query(productsRef, where('farmerId', '==', farmerId), orderBy('createdAt', 'desc'));
+    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
+  }
+
+  // Get all products for admin (including unapproved ones)
   getAllProductsForAdmin(): Observable<Product[]> {
     const productsRef = collection(this.firestore, 'products');
-    const q = query(
-      productsRef, 
-      orderBy('createdAt', 'desc')
-    );
-    
+    const q = query(productsRef, orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
-  
-  // Get a specific product by ID
+
+  // Get product by ID
   getProductById(id: string): Observable<Product> {
-    const productRef = doc(this.firestore, `products/${id}`);
-    return docData(productRef, { idField: 'id' }) as Observable<Product>;
-  }
-  
-  // Get products by farmer ID
-  getProductsByFarmerId(farmerId: string): Observable<Product[]> {
-    const productsRef = collection(this.firestore, 'products');
-    const q = query(
-      productsRef, 
-      where('farmerId', '==', farmerId),
-      orderBy('createdAt', 'desc')
+    const productRef = doc(this.firestore, 'products', id);
+    return from(getDoc(productRef)).pipe(
+      map(docSnap => {
+        if (docSnap.exists()) {
+          return { id: docSnap.id, ...docSnap.data() } as Product;
+        } else {
+          throw new Error('Product not found');
+        }
+      })
     );
-    
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
-  
-  // Alias for getProductsByFarmerId to match usage in code
-  getProductsByFarmer(farmerId: string): Observable<Product[]> {
-    return this.getProductsByFarmerId(farmerId);
-  }
-  
-  // Create a new product (alias for createProduct to match usage)
-  addProduct(product: Omit<Product, 'id'>): Observable<string> {
-    return this.createProduct(product);
-  }
-  
-  // Create a new product
-  createProduct(product: Omit<Product, 'id'>): Observable<string> {
-    const productsRef = collection(this.firestore, 'products');
-    
-    return new Observable<string>(observer => {
-      addDoc(productsRef, product)
-        .then(docRef => {
-          observer.next(docRef.id);
-          observer.complete();
-        })
-        .catch(error => {
-          observer.error(error);
-        });
-    });
-  }
-  
-  // Update an existing product
+
+  // Update product
   updateProduct(id: string, data: Partial<Product>): Observable<void> {
-    const productRef = doc(this.firestore, `products/${id}`);
-    
-    return new Observable<void>(observer => {
-      updateDoc(productRef, data)
-        .then(() => {
-          observer.next();
-          observer.complete();
-        })
-        .catch(error => {
-          observer.error(error);
-        });
-    });
+    const productRef = doc(this.firestore, 'products', id);
+    return from(updateDoc(productRef, data));
   }
-  
-  // Specifically approve a product (for admin)
+
+  // Approve product
   approveProduct(id: string): Observable<void> {
-    return this.updateProduct(id, { approved: true });
+    const productRef = doc(this.firestore, 'products', id);
+    return from(updateDoc(productRef, { approved: true }));
   }
-  
-  // Delete a product
+
+  // Delete product
   deleteProduct(id: string): Observable<void> {
-    const productRef = doc(this.firestore, `products/${id}`);
-    
-    return new Observable<void>(observer => {
-      deleteDoc(productRef)
-        .then(() => {
-          observer.next();
-          observer.complete();
-        })
-        .catch(error => {
-          observer.error(error);
-        });
-    });
+    const productRef = doc(this.firestore, 'products', id);
+    return from(deleteDoc(productRef));
   }
 }
