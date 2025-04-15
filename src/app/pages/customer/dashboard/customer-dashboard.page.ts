@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {IonGrid,IonRow,IonCol,IonCardTitle,IonCard,IonCardContent,IonCardHeader,IonMenuButton,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import {IonInput,IonGrid,IonRow,IonCol,IonCardTitle,IonCard,IonCardContent,IonCardHeader,IonMenuButton,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [IonGrid, IonRow, IonCol, IonCardTitle, IonCard, IonCardContent, IonCardHeader, IonMenuButton, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonInput,IonGrid, IonRow, IonCol, IonCardTitle, IonCard, IonCardContent, IonCardHeader, IonMenuButton, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

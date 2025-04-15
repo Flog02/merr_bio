@@ -7,12 +7,12 @@ import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { User } from '../../../models/user.model';
 import { UserService } from '../../../services/user.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-import{IonSearchbar,IonBackButton,IonItemOption,IonItemOptions,IonItemSliding,IonBadge,IonSegmentButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
+import{IonInput,IonSearchbar,IonBackButton,IonItemOption,IonItemOptions,IonItemSliding,IonBadge,IonSegmentButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [IonSearchbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe, IonBackButton, IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonSegmentButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
+  imports: [IonInput,IonSearchbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe, IonBackButton, IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonSegmentButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

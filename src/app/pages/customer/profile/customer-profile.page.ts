@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {IonGrid,IonRow,IonCol,IonFooter,IonFab,IonRadio,IonRadioGroup,IonListHeader,IonSearchbar,IonNote,IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubtitle,IonBackButton,IonImg,IonItemOption,IonItemOptions,IonRefresher,IonRefresherContent,IonItemSliding,IonBadge,IonFabButton,IonMenuButton,IonSegmentButton,IonItem,IonLabel,IonSelectOption,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
+import {IonInput,IonGrid,IonRow,IonCol,IonFooter,IonFab,IonRadio,IonRadioGroup,IonListHeader,IonSearchbar,IonNote,IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubtitle,IonBackButton,IonImg,IonItemOption,IonItemOptions,IonRefresher,IonRefresherContent,IonItemSliding,IonBadge,IonFabButton,IonMenuButton,IonSegmentButton,IonItem,IonLabel,IonSelectOption,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
@@ -10,7 +10,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonInput,IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

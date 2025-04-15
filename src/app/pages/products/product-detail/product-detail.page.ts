@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  
+  IonInput,
     IonSpinner,
   IonHeader,
   IonToolbar,
@@ -40,6 +40,7 @@ import { Timestamp } from '@angular/fire/firestore';
   selector: 'app-product-detail',
   standalone: true,
   imports: [
+    IonInput,
     IonSpinner,
     CommonModule,
     TranslatePipe,

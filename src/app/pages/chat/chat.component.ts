@@ -11,13 +11,13 @@ import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 import { UserService } from 'src/app/services/user.service';
 import { Timestamp } from '@angular/fire/firestore';
-import {IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import {IonInput,IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [IonFooter, IonBackButton, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule],
+  imports: [IonInput,IonFooter, IonBackButton, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>

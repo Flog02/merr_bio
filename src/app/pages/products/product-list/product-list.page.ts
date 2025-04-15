@@ -6,6 +6,7 @@ import { Observable, combineLatest, map, startWith } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { leaf, nutrition, water, grid, search, basketOutline, filterOutline } from 'ionicons/icons';
 import { 
+  IonInput,
   IonHeader, 
   IonToolbar, 
   IonTitle, 
@@ -36,6 +37,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-product-list',
   standalone: true,
   imports: [
+    IonInput,
     CommonModule,
     RouterLink,
     ReactiveFormsModule,

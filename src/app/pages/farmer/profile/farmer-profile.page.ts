@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {IonNote,IonSpinner,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import {IonInput,IonNote,IonSpinner,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-farmer-profile',
   standalone: true,
-  imports: [IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonInput,IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
