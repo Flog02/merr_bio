@@ -1,15 +1,15 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { IonicModule, ToastController, IonInput } from '@ionic/angular';
+import {  ToastController,IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import{IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

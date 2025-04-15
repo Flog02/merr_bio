@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonicModule ,AlertController, ToastController} from '@ionic/angular';
+import { AlertController, ToastController} from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../services/product.service';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../models/user.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubtitle,IonBackButton,IonImg,IonBadge,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 
 @Component({
   selector: 'app-admin-product-detail',
   standalone: true,
-  imports: [IonicModule, CommonModule, TranslatePipe],
+  imports: [IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, IonImg, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

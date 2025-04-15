@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import {IonFab,IonNote,IonBadge,IonFabButton,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, combineLatest, of } from 'rxjs';
@@ -14,7 +14,7 @@ import { ModalController } from '@ionic/angular';
 @Component({
   selector: 'app-chat-list',
   standalone: true,
-  imports: [IonicModule, CommonModule, RouterModule],
+  imports: [IonFab, IonNote, IonBadge, IonFabButton, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar, CommonModule, RouterModule],
   template: `
     <ion-header>
       <ion-toolbar>

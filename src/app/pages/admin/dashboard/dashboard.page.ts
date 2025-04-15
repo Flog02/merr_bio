@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule ,AlertController, ToastController } from '@ionic/angular';
+import {  AlertController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, map } from 'rxjs';
@@ -7,10 +7,12 @@ import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../services/product.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { FormsModule } from '@angular/forms';
+import{IonItemOption,IonItemOptions,IonRefresher,IonRefresherContent,IonItemSliding,IonBadge,IonFabButton,IonMenuButton,IonSegmentButton,IonItem,IonLabel,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonList,IonToolbar}from '@ionic/angular/standalone'
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [IonicModule, CommonModule, RouterModule, TranslatePipe,FormsModule],
+  imports: [IonItemOption, IonItemOptions, IonRefresher, IonRefresherContent, IonItemSliding, IonBadge, IonFabButton, IonMenuButton, IonSegmentButton, CommonModule, RouterModule, TranslatePipe, FormsModule, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

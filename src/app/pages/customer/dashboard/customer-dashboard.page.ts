@@ -1,17 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { Component } from '@angular/core';
+import {IonGrid,IonRow,IonCol,IonCardTitle,IonCard,IonCardContent,IonCardHeader,IonMenuButton,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Observable, combineLatest, map, startWith } from 'rxjs';
-import { Product } from '../../../models/product.model';
-import { ProductService } from '../../../services/product.service';
+import { ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [IonicModule, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonGrid, IonRow, IonCol, IonCardTitle, IonCard, IonCardContent, IonCardHeader, IonMenuButton, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

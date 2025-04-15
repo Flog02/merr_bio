@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { LanguageService } from '../../services/language.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from "../../pipes/translate.pipe";
+import{IonItem,IonLabel,IonSelectOption}from '@ionic/angular/standalone'
 // import { reload } from 'firebase/auth';
 @Component({
   selector: 'app-language-selector',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, TranslatePipe],
+  imports: [ CommonModule, FormsModule, TranslatePipe,IonItem,IonLabel,IonSelectOption],
   template: `
     <ion-item lines="none">
       <ion-label>{{ 'LANGUAGE' | translate }}</ion-label>

@@ -1,14 +1,16 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ModalController, IonicModule } from '@ionic/angular';
+import { ModalController,  } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { User } from '../../models/user.model';
 import { UserService } from '../../services/user.service';
+import{IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
+
 
 @Component({
   selector: 'app-user-select-modal',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [CommonModule, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
   template: `
     <ion-header>
       <ion-toolbar>

@@ -1,17 +1,20 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonicModule, ModalController, LoadingController, ToastController } from '@ionic/angular';
+import {  ModalController, LoadingController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../models/product.model';
 import { PurchaseRequestService } from 'src/app/services/purchase-request.service';
 import { PurchaseRequest } from '../../../models/request.model';
 import { Timestamp } from '@angular/fire/firestore';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import {IonTextarea,IonNote,IonCardTitle,IonCard,IonCardContent,IonCardHeader,IonCardSubtitle,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
   selector: 'app-purchase-request',
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule, TranslatePipe],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [IonTextarea, IonNote, IonCardTitle, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>{{ 'REQUEST_TO_PURCHASE' | translate }}</ion-title>

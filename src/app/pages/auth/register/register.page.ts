@@ -1,15 +1,15 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController, IonInput } from '@ionic/angular';
+import {  ToastController, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-
+import {IonRadio,IonRadioGroup,IonListHeader,IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar}from '@ionic/angular/standalone'
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

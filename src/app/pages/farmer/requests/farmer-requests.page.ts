@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import {IonItemOption,IonItemOptions,IonItemSliding,IonBadge,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonList,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -13,7 +13,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-farmer-requests',
   standalone: true,
-  imports: [IonicModule, CommonModule, RouterModule, TranslatePipe],
+  imports: [IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar, CommonModule, RouterModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

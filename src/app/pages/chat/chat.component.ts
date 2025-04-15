@@ -1,22 +1,23 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IonicModule, IonContent, LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
+import {  LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Observable, combineLatest, of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { Message } from '../../models/message.model';
 import { MessageService } from '../../services/message.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 import { UserService } from 'src/app/services/user.service';
 import { Timestamp } from '@angular/fire/firestore';
+import {IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule],
+  imports: [IonFooter, IonBackButton, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
