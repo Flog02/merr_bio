@@ -239,7 +239,7 @@ export class CustomerRequestsPage implements OnInit {
           // Load farmer names
           farmerIds.forEach(id => {
             this.userService.getUserById(id).subscribe(user => {
-              this.farmers.set(id, user.displayName || user.email);
+              this.farmers.set(id, user!.displayName || user!.email);
             });
           });
         });

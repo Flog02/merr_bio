@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { Router, RouterModule } from '@angular/router';
+import { IonicModule, ToastController, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -9,7 +9,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [IonicModule, CommonModule, ReactiveFormsModule],
+  imports: [IonicModule, CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -25,7 +25,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <!-- Email field with validation error -->
         <ion-item [class.ion-invalid]="isEmailInvalid()">
           <ion-label position="floating">Email</ion-label>
-          <ion-input type="email" formControlName="email"></ion-input>
+          <ion-input #emailInput type="email" formControlName="email"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isEmailInvalid()">
           Please enter a valid email address
@@ -34,7 +34,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <!-- Password field -->
         <ion-item [class.ion-invalid]="isPasswordEmpty()">
           <ion-label position="floating">Password</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
+          <ion-input #passwordInput type="password" formControlName="password"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isPasswordEmpty()">
           Password is required
@@ -52,7 +52,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       </form>
 
       <div class="ion-text-center ion-padding-top">
-        <p>Don't have an account? <a href="/register">Register</a></p>
+        <p>Don't have an account? <a routerLink="/register">Register</a></p>
       </div>
     </ion-content>
   `,
@@ -84,6 +84,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   `
 })
 export class LoginPage {
+  @ViewChild('emailInput') emailInput!: IonInput;
+  @ViewChild('passwordInput') passwordInput!: IonInput;
+  
   loginForm: FormGroup;
   authError: string | null = null;
 
@@ -114,6 +117,19 @@ export class LoginPage {
     return control?.touched && control?.hasError('required') || false;
   }
 
+  // Focus the first invalid input
+  focusFirstInvalidControl() {
+    if (this.isEmailInvalid() && this.emailInput) {
+      this.emailInput.setFocus();
+      return;
+    }
+    
+    if (this.isPasswordEmpty() && this.passwordInput) {
+      this.passwordInput.setFocus();
+      return;
+    }
+  }
+
   onSubmit() {
     // Reset auth error
     this.authError = null;
@@ -123,6 +139,10 @@ export class LoginPage {
       Object.keys(this.loginForm.controls).forEach(key => {
         this.loginForm.get(key)?.markAsTouched();
       });
+      
+      // Focus the first invalid input after a short delay
+      setTimeout(() => this.focusFirstInvalidControl(), 100);
+      
       return;
     }
   
@@ -131,6 +151,7 @@ export class LoginPage {
       next: (user) => {
         console.log('Login successful:', user);
         this.showToast('Login successful!', 'success');
+        this.router.navigate(['/']);
       },
       error: (error) => {
         console.error('Login error', error);

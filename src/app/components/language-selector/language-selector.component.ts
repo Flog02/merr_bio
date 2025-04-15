@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { LanguageService } from '../../services/language.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from "../../pipes/translate.pipe";
-import { reload } from 'firebase/auth';
+// import { reload } from 'firebase/auth';
 @Component({
   selector: 'app-language-selector',
   standalone: true,
@@ -33,5 +33,6 @@ export class LanguageSelectorComponent implements OnInit {
   changeLanguage() {
     this.languageService.setLanguage(this.currentLang as 'en' | 'sq');
     window.location.reload()
+
   }
 }

@@ -93,7 +93,7 @@ export class FarmerRequestsPage implements OnInit {
           // Load customer names
           customerIds.forEach(id => {
             this.userService.getUserById(id).subscribe(user => {
-              this.customers.set(id, user.displayName || user.email);
+              this.customers.set(id, user?.displayName || user!.email);
             });
           });
         });

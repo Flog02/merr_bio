@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -25,7 +25,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <!-- Email field with error message -->
         <ion-item [class.ion-invalid]="isEmailInvalid()">
           <ion-label position="floating">{{ 'EMAIL' | translate }}</ion-label>
-          <ion-input type="email" formControlName="email"></ion-input>
+          <ion-input #emailInput type="email" formControlName="email"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isEmailInvalid()">
           {{ 'EMAIL_INVALID' | translate }}
@@ -34,7 +34,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <!-- Password field with error message -->
         <ion-item [class.ion-invalid]="isPasswordTooShort()">
           <ion-label position="floating">{{ 'PASSWORD' | translate }}</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
+          <ion-input #passwordInput type="password" formControlName="password"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isPasswordTooShort()">
           {{ 'PASSWORD_MIN_LENGTH' | translate }}
@@ -78,7 +78,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       </form>
 
       <div class="ion-text-center ion-padding-top">
-        <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }} <a href="/login">{{ 'LOGIN' | translate }}</a></p>
+        <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }} <a routerLink="/login">{{ 'LOGIN' | translate }}</a></p>
       </div>
     </ion-content>
   `,
@@ -95,6 +95,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   `
 })
 export class RegisterPage {
+  @ViewChild('emailInput') emailInput!: IonInput;
+  @ViewChild('passwordInput') passwordInput!: IonInput;
+  
   registerForm: FormGroup;
 
   constructor(
@@ -128,6 +131,19 @@ export class RegisterPage {
     return control?.touched && control?.hasError('minlength') || false;
   }
 
+  // Focus the first invalid input
+  focusFirstInvalidControl() {
+    if (this.isEmailInvalid() && this.emailInput) {
+      this.emailInput.setFocus();
+      return;
+    }
+    
+    if (this.isPasswordTooShort() && this.passwordInput) {
+      this.passwordInput.setFocus();
+      return;
+    }
+  }
+
   async onSubmit() {
     if (this.registerForm.invalid) {
       // Mark all fields as touched to trigger validation error messages
@@ -135,6 +151,9 @@ export class RegisterPage {
         const control = this.registerForm.get(key);
         control?.markAsTouched();
       });
+      
+      // Focus the first invalid input
+      setTimeout(() => this.focusFirstInvalidControl(), 100);
       
       // Show a toast with an error message
       const toast = await this.toastController.create({

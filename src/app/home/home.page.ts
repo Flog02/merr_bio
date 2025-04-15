@@ -1,4 +1,3 @@
-
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -9,7 +8,7 @@ import {
   IonChip, IonLabel, IonAvatar, IonItem, IonBadge, IonMenuButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { leaf, nutrition, people, globe, basket, chatbubbles, person } from 'ionicons/icons';
+import { leaf, nutrition, people, globe, basket, chatbubbles, person, arrowForward, water, grid, search } from 'ionicons/icons';
 import { TranslatePipe } from '../pipes/translate.pipe';
 import { AuthService } from '../services/auth.service';
 import { ProductService } from '../services/product.service';
@@ -52,7 +51,7 @@ export class HomePage {
     private productService: ProductService,
     private auth: Auth
   ) {
-    addIcons({ leaf, nutrition, people, globe, basket, chatbubbles, person });
+    addIcons({arrowForward,leaf,nutrition,water,grid,search,basket,chatbubbles,people,globe,person});
     
     this.featuredProducts$ = this.productService.getProducts();
     
@@ -60,4 +59,5 @@ export class HomePage {
       this.currentUser = user;
     });
   }
+  
 }

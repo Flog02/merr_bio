@@ -24,7 +24,7 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {search,water, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline } from 'ionicons/icons';
+import {search,water, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical } from 'ionicons/icons';
 
 addIcons({
   home,
@@ -66,6 +66,7 @@ addIcons({
   'person':person,
   'send':send,
   'attach':attach,
-  'add':add
+  'add':add,
+  'ellipsis-vertical':ellipsisVertical
   
 });

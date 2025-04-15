@@ -89,7 +89,7 @@ import { Timestamp } from '@angular/fire/firestore';
       
       <ion-toolbar>
         <div class="message-input-container">
-          <ion-button fill="clear" class="attachment-button" (click)="openAttachmentOptions()">
+          <ion-button fill="clear" class="attachment-button" >
             <ion-icon name="attach"></ion-icon>
           </ion-button>
           
@@ -328,8 +328,8 @@ import { Timestamp } from '@angular/fire/firestore';
   `]
 })
 export class ChatComponent implements OnInit {
-  @ViewChild('content') content!: IonContent;
-  @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('content', { static: false }) content!: IonContent;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   
   messages$!: Observable<Message[]>;
   currentUser: User | null = null;
@@ -444,35 +444,35 @@ export class ChatComponent implements OnInit {
     return !!(this.messageControl.value && this.messageControl.value.trim());
   }
   
-  async openAttachmentOptions() {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Attachments',
-      buttons: [
-        {
-          text: 'Camera',
-          icon: 'camera',
-          handler: () => {
-            // Handle camera (could open device camera if on mobile)
-            this.fileInput.nativeElement.click();
-          }
-        },
-        {
-          text: 'Photo Library',
-          icon: 'image',
-          handler: () => {
-            this.fileInput.nativeElement.click();
-          }
-        },
-        {
-          text: 'Cancel',
-          icon: 'close',
-          role: 'cancel'
-        }
-      ]
-    });
+  // async openAttachmentOptions() {
+  //   const actionSheet = await this.actionSheetController.create({
+  //     header: 'Attachments',
+  //     buttons: [
+  //       {
+  //         text: 'Camera',
+  //         icon: 'camera',
+  //         handler: () => {
+  //           // Handle camera (could open device camera if on mobile)
+  //           this.fileInput.nativeElement.click();
+  //         }
+  //       },
+  //       {
+  //         text: 'Photo Library',
+  //         icon: 'image',
+  //         handler: () => {
+  //           this.fileInput.nativeElement.click();
+  //         }
+  //       },
+  //       {
+  //         text: 'Cancel',
+  //         icon: 'close',
+  //         role: 'cancel'
+  //       }
+  //     ]
+  //   });
     
-    await actionSheet.present();
-  }
+  //   await actionSheet.present();
+  // }
   
   onFileSelected(event: any) {
     const file = event.target.files?.[0];
