@@ -9,7 +9,7 @@ import {IonRadio,IonRadioGroup,IonListHeader,IonBackButton,IonItem,IonLabel,IonH
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel, IonHeader, IonTitle,IonInput ,IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

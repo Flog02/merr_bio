@@ -9,7 +9,7 @@ import{IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,Io
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, RouterModule,IonInput],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
