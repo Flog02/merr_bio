@@ -11,7 +11,7 @@ import {IonHeader,IonToolbar,IonButton,IonButtons,IonMenuButton,IonTitle,IonSegm
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule,IonButton, TranslatePipe,FormsModule,IonItemOption,IonSegment, IonItemOptions, IonRefresher, IonRefresherContent, IonItemSliding, IonBadge, IonFabButton, IonMenuButton, IonSegmentButton, CommonModule, RouterModule, IonFab,TranslatePipe, FormsModule, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar],
+  imports: [CommonModule, RouterModule, TranslatePipe, FormsModule, IonItemOption, IonSegment, IonItemOptions, IonRefresher, IonRefresherContent, IonItemSliding, IonBadge, IonFabButton, IonMenuButton, IonSegmentButton, CommonModule, RouterModule, IonFab, TranslatePipe, FormsModule, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

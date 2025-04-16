@@ -5,30 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, combineLatest, map, startWith } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { leaf, nutrition, water, grid, search, basketOutline, filterOutline } from 'ionicons/icons';
-import { 
-  IonInput,
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
-  IonSearchbar,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonCard,
-  IonCardContent,
-  IonItem,
-  IonLabel,
-  IonButtons,
-  IonBackButton,
-  IonButton,
-  IonIcon,
-  IonSegment,
-  IonSegmentButton,
-  IonMenuButton,
-  IonSkeletonText,
-  IonChip
-} from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar,IonGrid,IonRow,IonCol,IonCard,IonCardContent,IonLabel,IonButtons,IonIcon,IonMenuButton,IonSkeletonText,IonChip} from '@ionic/angular/standalone';
 import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../services/product.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -37,7 +14,6 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-product-list',
   standalone: true,
   imports: [
-    IonInput,
     CommonModule,
     RouterLink,
     ReactiveFormsModule,

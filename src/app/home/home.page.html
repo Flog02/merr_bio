@@ -35,11 +35,11 @@
 
     <div class="product-slider">
       <ion-card class="product-card" *ngFor="let product of (featuredProducts$ | async)?.slice(0,4)" [routerLink]="['/products', product.id]">
-        <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+        <img src="assets/product-placeholder.jpg" alt="{{ product.name || '' }}">
         <ion-card-content>
           <h3>{{ product.name }}</h3>
-          <div class="price">{{ product.price }} ALL <span class="unit">/ {{ product.unit }}</span></div>
-          <div class="availability">{{ product.quantity }} {{ product.unit }} {{ 'AVAILABLE' | translate }}</div>
+          <div class="price">{{ product.price || ''}} ALL <span class="unit">/ {{ product.unit || ''}}</span></div>
+          <div class="availability">{{ product.quantity || ''}} {{ product.unit || ''}} {{ 'AVAILABLE' | translate }}</div>
         </ion-card-content>
       </ion-card>
     </div>
