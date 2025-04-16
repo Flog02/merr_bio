@@ -13,7 +13,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-farmer-requests',
   standalone: true,
-  imports: [IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar, CommonModule, RouterModule, TranslatePipe],
+  imports: [CommonModule,IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar, CommonModule, RouterModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -93,7 +93,7 @@ export class FarmerRequestsPage implements OnInit {
           // Load customer names
           customerIds.forEach(id => {
             this.userService.getUserById(id).subscribe(user => {
-              this.customers.set(id, user?.displayName || user!.email);
+              this.customers.set(id, user?.displayName || user?.email || '');
             });
           });
         });

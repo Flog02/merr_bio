@@ -9,17 +9,13 @@ import {
   IonRouterOutlet, 
   IonSplitPane,
   IonMenu,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonList,
   IonMenuToggle,
   IonItem,
   IonIcon,
   IonLabel,
-  IonButton,
-  IonButtons, IonFooter } from '@ionic/angular/standalone';
+  IonFooter } from '@ionic/angular/standalone';
 import { RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from "./pipes/translate.pipe";
 import { LanguageSelectorComponent } from "./components/language-selector/language-selector.component";

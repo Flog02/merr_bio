@@ -9,12 +9,12 @@ import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { UserSelectModalComponent } from 'src/app/components/user-select-modal/user-select-modal.component';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-chat-list',
   standalone: true,
-  imports: [IonInput,IonFab, IonNote, IonBadge, IonFabButton, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar, CommonModule, RouterModule],
+  imports: [IonFab, IonNote, IonBadge, IonFabButton, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar, CommonModule, RouterModule],
   template: `
     <ion-header>
       <ion-toolbar>

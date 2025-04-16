@@ -7,12 +7,11 @@ import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../services/product.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { FormsModule } from '@angular/forms';
-import{IonItemOption,IonItemOptions,IonRefresher,IonRefresherContent,IonItemSliding,IonBadge,IonFabButton,IonMenuButton,IonSegmentButton,IonItem,IonLabel,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonList,IonToolbar}from '@ionic/angular/standalone'
-
+import {IonHeader,IonToolbar,IonButton,IonButtons,IonMenuButton,IonTitle,IonSegment,IonSegmentButton,IonLabel,IonContent,IonRefresher,IonRefresherContent,IonList,IonItemSliding,IonBadge,IonItemOptions,IonItemOption,IonIcon,IonFabButton,IonFab,IonItem} from '@ionic/angular/standalone'
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [IonItemOption, IonItemOptions, IonRefresher, IonRefresherContent, IonItemSliding, IonBadge, IonFabButton, IonMenuButton, IonSegmentButton, CommonModule, RouterModule, TranslatePipe, FormsModule, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar],
+  imports: [CommonModule, RouterModule,IonButton, TranslatePipe,FormsModule,IonItemOption,IonSegment, IonItemOptions, IonRefresher, IonRefresherContent, IonItemSliding, IonBadge, IonFabButton, IonMenuButton, IonSegmentButton, CommonModule, RouterModule, IonFab,TranslatePipe, FormsModule, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

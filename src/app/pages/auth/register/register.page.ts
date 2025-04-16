@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import {IonRadio,IonRadioGroup,IonListHeader,IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar,IonInput}from '@ionic/angular/standalone'
+import { FormControl } from '@angular/forms';
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -102,6 +104,8 @@ export class RegisterPage {
 
   constructor(
     private formBuilder: FormBuilder,
+    // private formControl:FormControl,
+    // private formGroup:FormGroup,
     private authService: AuthService,
     private router: Router,
     private toastController: ToastController

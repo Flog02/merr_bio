@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {  LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
+import {  LoadingController, ToastController, ActionSheetController  } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -12,6 +12,7 @@ import { User } from '../../models/user.model';
 import { UserService } from 'src/app/services/user.service';
 import { Timestamp } from '@angular/fire/firestore';
 import {IonInput,IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import { ModalController } from '@ionic/angular/standalone';
 
 
 @Component({
@@ -90,8 +91,7 @@ import {IonInput,IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons
       
       <ion-toolbar>
         <div class="message-input-container">
-          <ion-button fill="clear" class="attachment-button" >
-            <ion-icon name="attach"></ion-icon>
+        <ion-button fill="clear" class="attachment-button" (click)="openAttachmentOptions()">            <ion-icon name="attach"></ion-icon>
           </ion-button>
           
           <ion-input 
@@ -329,9 +329,9 @@ import {IonInput,IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons
   `]
 })
 export class ChatComponent implements OnInit {
-  @ViewChild('content', { static: false }) content!: IonContent;
-  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
-  
+  @ViewChild('content') content!: IonContent;
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
   messages$!: Observable<Message[]>;
   currentUser: User | null = null;
   otherUser: User | null = null;
@@ -350,6 +350,7 @@ export class ChatComponent implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
+    private modalController:ModalController
   ) {}
 
   ngOnInit() {
@@ -445,35 +446,35 @@ export class ChatComponent implements OnInit {
     return !!(this.messageControl.value && this.messageControl.value.trim());
   }
   
-  // async openAttachmentOptions() {
-  //   const actionSheet = await this.actionSheetController.create({
-  //     header: 'Attachments',
-  //     buttons: [
-  //       {
-  //         text: 'Camera',
-  //         icon: 'camera',
-  //         handler: () => {
-  //           // Handle camera (could open device camera if on mobile)
-  //           this.fileInput.nativeElement.click();
-  //         }
-  //       },
-  //       {
-  //         text: 'Photo Library',
-  //         icon: 'image',
-  //         handler: () => {
-  //           this.fileInput.nativeElement.click();
-  //         }
-  //       },
-  //       {
-  //         text: 'Cancel',
-  //         icon: 'close',
-  //         role: 'cancel'
-  //       }
-  //     ]
-  //   });
+  async openAttachmentOptions() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Attachments',
+      buttons: [
+        {
+          text: 'Camera',
+          icon: 'camera',
+          handler: () => {
+            // Handle camera (could open device camera if on mobile)
+            this.fileInput.nativeElement.click();
+          }
+        },
+        {
+          text: 'Photo Library',
+          icon: 'image',
+          handler: () => {
+            this.fileInput.nativeElement.click();
+          }
+        },
+        {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
     
-  //   await actionSheet.present();
-  // }
+    await actionSheet.present();
+  }
   
   onFileSelected(event: any) {
     const file = event.target.files?.[0];

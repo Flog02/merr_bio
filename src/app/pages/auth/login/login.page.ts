@@ -5,11 +5,13 @@ import {  ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import{IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar,IonInput}from '@ionic/angular/standalone'
+import { FormControl } from '@angular/forms/';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, RouterModule,IonInput],
+  imports: [TranslatePipe,IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, RouterModule,IonInput],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -92,6 +94,7 @@ export class LoginPage {
 
   constructor(
     private formBuilder: FormBuilder,
+    // private formControl : FormControl,
     private authService: AuthService,
     private router: Router,
     private toastController: ToastController

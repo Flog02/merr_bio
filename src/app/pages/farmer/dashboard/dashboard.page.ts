@@ -1,6 +1,6 @@
 // src/app/pages/farmer/dashboard/dashboard.page.ts
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink,Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { add, create, trash, checkmarkCircle, alertCircle } from 'ionicons/icons';
@@ -117,7 +117,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         
         <ion-list lines="full">
           <ion-item-sliding *ngFor="let product of products$ | async">
-            <ion-item [routerLink]="['/farmer/products', product.id]">
+            <ion-item (click)="editProduct(product.id)" [routerLink]="['/farmer/products', product.id]" >
               <div class="product-image" slot="start">
                 <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
               </div>
@@ -252,7 +252,9 @@ export class FarmerDashboardPage implements OnInit {
     private authService: AuthService,
     private alertController: AlertController,
     private loadingController: LoadingController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private router: Router,
+
   ) {
     addIcons({ add, create, trash, checkmarkCircle, alertCircle });
   }
@@ -272,6 +274,7 @@ export class FarmerDashboardPage implements OnInit {
 
   editProduct(id: any) {
     // Navigation handled by routerLink
+    this.router.navigate(['/farmer/products',id])
   }
 
   async deleteProduct(id: any) {

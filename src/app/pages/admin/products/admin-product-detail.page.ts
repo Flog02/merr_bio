@@ -12,7 +12,7 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
 @Component({
   selector: 'app-admin-product-detail',
   standalone: true,
-  imports: [IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, IonImg, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
+  imports: [CommonModule, TranslatePipe,IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, IonImg, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -51,7 +51,7 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
         <p><strong>{{ 'DESCRIPTION' | translate }}:</strong> {{ product.description }}</p>
         <p><strong>{{ 'AVAILABILITY' | translate }}:</strong> {{ product.quantity }} {{ product.unit }}</p>
         <p><strong>{{ 'CATEGORY' | translate }}:</strong> {{ product.category }}</p>
-        <p><strong>{{ 'CREATED_AT' | translate }}:</strong> {{ product.timestamp.toDate() | date:'medium' }}</p>
+        <p><strong>{{ 'CREATED_AT' | translate }}:</strong> {{ product.timestamp.toDate() || '' }}</p>
       </ion-card-content>
     </ion-card>
 

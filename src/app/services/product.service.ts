@@ -61,7 +61,9 @@ export class ProductService {
         if (docSnap.exists()) {
           return { id: docSnap.id, ...docSnap.data() } as Product;
         } else {
-          throw new Error('Product not found');
+          throw console.log('product not found');
+         
+          
         }
       })
     );

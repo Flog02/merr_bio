@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar,
-  IonButtons, IonButton, IonIcon, IonCard, IonCardHeader,
-  IonCardTitle, IonCardContent, IonGrid, IonRow, IonCol,
-  IonChip, IonLabel, IonAvatar, IonItem, IonBadge, IonMenuButton
+  IonHeader, IonToolbar, IonTitle, IonContent, 
+  IonButtons, IonButton, IonIcon, IonCard, 
+  IonCardContent, IonGrid, IonRow, IonCol,
+  IonMenuButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { leaf, nutrition, people, globe, basket, chatbubbles, person, arrowForward, water, grid, search } from 'ionicons/icons';
@@ -39,7 +39,10 @@ import { Auth } from '@angular/fire/auth';
     IonRow,
     IonCol,
     IonMenuButton,
-    
+    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonButtons, IonButton, IonIcon, IonCard,
+    IonCardContent, IonGrid, IonRow, IonCol,
+    IonMenuButton
 ]
 })
 export class HomePage {

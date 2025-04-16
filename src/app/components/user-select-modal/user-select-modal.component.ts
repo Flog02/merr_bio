@@ -10,7 +10,7 @@ import{IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonConte
 @Component({
   selector: 'app-user-select-modal',
   standalone: true,
-  imports: [CommonModule, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
+  imports: [CommonModule,CommonModule, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
   template: `
     <ion-header>
       <ion-toolbar>

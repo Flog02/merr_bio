@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import {IonNote,IonBackButton,IonItem,IonLabel,IonSelectOption,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import {IonTextarea,IonSelect,IonSelectModal,IonInput,IonNote,IonBackButton,IonItem,IonLabel,IonSelectOption,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../../services/product.service';
 import { AuthService } from '../../../services/auth.service';
@@ -12,7 +12,7 @@ import { of } from 'rxjs';
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [IonNote, IonBackButton, IonItem, IonLabel, IonSelectOption, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule],
+  imports: [IonTextarea,IonSelect,IonSelectModal,IonInput,IonNote, IonBackButton, IonItem, IonLabel, IonSelectOption, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

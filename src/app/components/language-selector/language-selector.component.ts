@@ -8,7 +8,7 @@ import{IonItem,IonLabel,IonSelectOption}from '@ionic/angular/standalone'
 @Component({
   selector: 'app-language-selector',
   standalone: true,
-  imports: [ CommonModule, FormsModule, TranslatePipe,IonItem,IonLabel,IonSelectOption],
+  imports: [CommonModule, FormsModule, TranslatePipe,IonItem,IonLabel,IonSelectOption],
   template: `
     <ion-item lines="none">
       <ion-label>{{ 'LANGUAGE' | translate }}</ion-label>
