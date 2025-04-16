@@ -31,8 +31,8 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <p>{{ 'QUANTITY' | translate }}: {{ request.quantity }}</p>
         <p>{{ 'FARMER' | translate }}: {{ getFarmerName(request.farmerId) }}</p>
         <p>{{ request.message }}</p>
-        <p>{{ request.timestamp.toDate() | date:'medium' : 'Not Available' }}</p>
-      </ion-label>
+        <p>{{ request.timestamp.toDate() | date:'medium' }}</p>
+            </ion-label>
       <ion-badge slot="end" color="{{ getBadgeColor(request.status) }}">
         {{ getStatusText(request.status) | translate }}
       </ion-badge>
