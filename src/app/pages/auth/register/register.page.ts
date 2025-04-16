@@ -80,7 +80,7 @@ import { FormControl } from '@angular/forms';
       </form>
 
       <div class="ion-text-center ion-padding-top">
-        <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }} <a routerLink="/login">{{ 'LOGIN' | translate }}</a></p>
+        <p>{{ 'ALREADY_HAVE_ACCOUNT' | translate }} <a href="/login">{{ 'LOGIN' | translate }}</a></p>
       </div>
     </ion-content>
   `,

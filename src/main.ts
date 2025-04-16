@@ -24,23 +24,23 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {search,water, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical } from 'ionicons/icons';
+import {search,water,close, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical } from 'ionicons/icons';
 
 addIcons({
-  home,
-  search,
-  list,
+  'home':home,
+  'search':search,
+  'list':list,
   'settings-outline':settingsOutline,
   'log-in': logIn,
   'person-add': personAdd,
   'arrow-forward':arrowForward,
   'water':water,
-  grid,
-  cart,
-  chatbubbles,
+  'grid':grid,
+  'cart':cart,
+  'chatbubbles':chatbubbles,
   'add-circle': addCircle,
   'list-circle': listCircle,
-  shield,
+  'shield':shield,
   'log-out': logOut,
   'home-outline': homeOutline,
   'grid-outline': gridOutline,
@@ -52,8 +52,8 @@ addIcons({
   'speedometer-outline':speedometerOutline,
   'cart-outline':cartOutline,
   'cube-outline':cubeOutline,
-  people,
-  trash,
+  'people':people,
+  'trash':trash,
   'people-outline':peopleOutline,
   'shield-outline':shieldOutline,
   'trash-outline':trashOutline,
@@ -67,6 +67,7 @@ addIcons({
   'send':send,
   'attach':attach,
   'add':add,
+  'close': close,
   'ellipsis-vertical':ellipsisVertical
   
 });

@@ -9,6 +9,7 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
+      
       'MY_PROFILE':'My Profile',
       'HOW_IT_WORKS':'HOW IT WORKS',
       'LOGOUT': 'Logout',
@@ -137,6 +138,7 @@ export class LanguageService {
     },
     sq: {
       // Common
+      'LANGUAGE':'Gjuha',
       'MY_PROFILE':'Profili Im',
             'HOW_IT_WORKS':'Si Perdoret',
       'LOGOUT': 'Dil',
