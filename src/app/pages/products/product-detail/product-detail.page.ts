@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   IonInput,
-    IonSpinner,
+  IonSpinner,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -40,7 +40,6 @@ import { Timestamp } from '@angular/fire/firestore';
   selector: 'app-product-detail',
   standalone: true,
   imports: [
-    IonInput,
     IonSpinner,
     CommonModule,
     TranslatePipe,
@@ -51,7 +50,7 @@ import { Timestamp } from '@angular/fire/firestore';
     IonButtons,
     IonBackButton,
     IonIcon
-],
+  ],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar class="header-transparent">
     <ion-buttons slot="start">
@@ -99,6 +98,10 @@ import { Timestamp } from '@angular/fire/firestore';
             <span class="label">{{ 'CATEGORY' | translate }}:</span>
             <span class="value">{{ product.category }}</span>
           </div>
+          <div class="meta-item" *ngIf="product.timestamp">
+            <span class="label">{{ 'POSTED_ON' | translate }}:</span>
+            <span class="value">{{ formatTimestamp(product.timestamp) }}</span>
+          </div>
         </div>
       </div>
       
@@ -126,6 +129,13 @@ import { Timestamp } from '@angular/fire/firestore';
   <div class="action-button" *ngIf="product && currentUser?.role === 'customer'">
   <ion-button expand="block" (click)="requestToBuy(); ">
     {{ 'ADD_TO_CART' | translate }} | {{ product.price * selectedQuantity }} ALL
+  </ion-button>
+</div>
+
+<!-- Admin button  -->
+<div class="action-button" *ngIf="product && currentUser?.role === 'admin'">
+  <ion-button expand="block" (click)="editPost(product.id); ">
+    {{ 'Edit Post' | translate }}
   </ion-button>
 </div>
 
@@ -512,6 +522,19 @@ export class ProductDetailPage implements OnInit {
     }
   }
   
+  // Helper method to safely format timestamp
+  formatTimestamp(timestamp: Timestamp | null | undefined): string {
+    if (!timestamp) {
+      return 'Unknown date';
+    }
+    
+    try {
+      return timestamp.toDate().toLocaleDateString() + ' ' + timestamp.toDate().toLocaleTimeString();
+    } catch (error) {
+      console.error('Error formatting timestamp:', error);
+      return 'Invalid date';
+    }
+  }
 
   selectQuantity(qty: number) {
     this.selectedQuantity = qty;
@@ -541,6 +564,29 @@ export class ProductDetailPage implements OnInit {
       }
       
       await this.showPurchaseConfirmation();
+    } catch (error) {
+      console.error('Error in requestToBuy:', error);
+      this.showErrorToast('An unexpected error occurred');
+    }
+  }
+
+  async editPost(productId:any){
+    console.log('Request button clicked');  // Keep this debug line
+    
+    try {
+      if (!this.currentUser) {
+        console.log('No user logged in');
+        this.showErrorToast('Please log in to make request');
+        return;
+      }
+      
+      console.log('Current user role:', this.currentUser.role);
+      if (this.currentUser.role !== 'admin') {
+        this.showErrorToast('Only admin can make this requests');
+        return;
+      }
+      
+      await this.router.navigate(['/admin/products',productId]);
     } catch (error) {
       console.error('Error in requestToBuy:', error);
       this.showErrorToast('An unexpected error occurred');
@@ -605,7 +651,7 @@ export class ProductDetailPage implements OnInit {
       quantity: this.selectedQuantity,
       status: 'pending' as 'pending',
       timestamp: Timestamp.fromDate(new Date()),
-      createdAt: Timestamp.fromDate(new Date()),  // Add this line
+      createdAt: Timestamp.fromDate(new Date()),
       message: `I would like to purchase ${this.selectedQuantity} ${this.product.unit} of ${this.product.name}.`
     };
     
@@ -622,6 +668,4 @@ export class ProductDetailPage implements OnInit {
       }
     });
   }
-
-
 }

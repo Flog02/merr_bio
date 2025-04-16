@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, doc, getDoc, updateDoc, collection, query, where, getDocs, setDoc, deleteDoc } from '@angular/fire/firestore';
-import { Observable, from, map, catchError, of } from 'rxjs';
+import { Firestore, doc, getDoc, updateDoc, collection, query, where, getDocs, setDoc, deleteDoc, QuerySnapshot, DocumentData } from '@angular/fire/firestore';
+import { Observable, from, map, catchError, of, switchMap } from 'rxjs';
 import { User } from '../models/user.model';
 import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { ProductService } from './product.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
 export class UserService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
+  private productService = inject(ProductService);
 
   getUserById(uid: string): Observable<User | null> {
     const userRef = doc(this.firestore, 'users', uid);
@@ -52,7 +54,20 @@ export class UserService {
       })
     );
   }
-
+  getAllUsers(): Observable<User[]> {
+    const usersRef = collection(this.firestore, 'users');
+    return from(getDocs(usersRef)).pipe(
+      map((querySnapshot: QuerySnapshot<DocumentData>) => 
+        querySnapshot.docs
+          .filter(doc => doc.exists()) // Filter out non-existent documents
+          .map(doc => this.parseUserDoc(doc))
+      ),
+      catchError(error => {
+        console.error('Error fetching all users:', error);
+        return of([]);
+      })
+    );
+  }
   async getCurrentUser(): Promise<User | null> {
     return new Promise((resolve) => {
       const unsubscribe = this.auth.onAuthStateChanged(user => {
@@ -69,19 +84,57 @@ export class UserService {
     });
   }
 
-  async deleteUser(uid: string): Promise<void> {
-    try {
-      // Delete user document in Firestore
-      const userRef = doc(this.firestore, 'users', uid);
-      await deleteDoc(userRef);
-      
-      // Note: To fully delete a user from Firebase Auth,
-      // you would need to use Firebase Admin SDK or Cloud Functions
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      return Promise.reject(error);
+  deleteUser(uid: string): Observable<void> {
+    if (!uid) {
+      console.error('Invalid user ID provided for deletion');
+      return from(Promise.reject(new Error('Invalid user ID')));
     }
+    
+    // First, get the user to check their role
+    return this.getUserById(uid).pipe(
+      switchMap(user => {
+        if (!user) {
+          console.log(`User with ID ${uid} not found, proceeding with deletion anyway`);
+          // Even if user not found, try to delete any products just in case
+          return this.productService.deleteProductsByFarmer(uid).pipe(
+            switchMap(() => {
+              // Then try to delete the user document (which might not exist)
+              const userRef = doc(this.firestore, 'users', uid);
+              return from(deleteDoc(userRef)).pipe(
+                catchError(error => {
+                  // If the document doesn't exist, consider it a success
+                  console.log('User document might not exist, continuing:', error);
+                  return of(undefined);
+                })
+              );
+            })
+          );
+        }
+        
+        // If user is a farmer, first delete all their products
+        if (user.role === 'farmer') {
+          return this.productService.deleteProductsByFarmer(uid).pipe(
+            switchMap(() => {
+              // Then delete the user document
+              const userRef = doc(this.firestore, 'users', uid);
+              return from(deleteDoc(userRef));
+            }),
+            catchError(error => {
+              console.error(`Error during deletion cascade for user ${uid}:`, error);
+              throw error;
+            })
+          );
+        } else {
+          // For non-farmers, just delete the user document
+          const userRef = doc(this.firestore, 'users', uid);
+          return from(deleteDoc(userRef));
+        }
+      }),
+      catchError(error => {
+        console.error('Error deleting user:', error);
+        throw error;
+      })
+    );
   }
 
   async createAdminUser(email: string, password: string, displayName: string): Promise<void> {

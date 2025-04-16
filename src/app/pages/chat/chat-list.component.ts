@@ -39,7 +39,7 @@ import { ModalController } from '@ionic/angular/standalone';
           </ion-label>
           <ion-badge *ngIf="user.unreadCount > 0" slot="end">{{ user.unreadCount }}</ion-badge>
           <ion-note slot="end">
-            {{ user.lastMessageTime ? (user.lastMessageTime.toDate() | date:'shortTime') : '' }}
+            {{ user.lastMessageTime ? (user.lastMessageTime.toDate() | date:'shortTime') : 'Not Available' }}
           </ion-note>
         </ion-item>
         

@@ -51,7 +51,8 @@ import { ModalController } from '@ionic/angular/standalone';
         <ng-container *ngFor="let message of messages$ | async; let i = index; let last = last">
           <!-- Date divider when date changes -->
           <div class="date-divider" *ngIf="shouldShowDateDivider(message, i, (messages$ | async))">
-            <span>{{ message.timestamp.toDate() | date:'mediumDate' }}</span>
+            <span>{{ message.timestamp.toDate() | date:'mediumDate' : 'Not Available' }}</span>
+
           </div>
           
           <div [ngClass]="{'message-group': true, 'my-message': message.senderId === currentUser?.uid, 
@@ -66,7 +67,7 @@ import { ModalController } from '@ionic/angular/standalone';
             </div>
             
             <div class="message-info">
-              <span class="message-time">{{ message.timestamp.toDate() | date:'shortTime' }}</span>
+              <span class="message-time">{{ message.timestamp.toDate() | date:'shortTime' : 'Not Available' }}</span>
               
               <!-- Read status for my messages -->
               <span *ngIf="message.senderId === currentUser?.uid" class="message-status">
