@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {  LoadingController, ToastController, ActionSheetController  } from '@ionic/angular';
+import {  LoadingController, ToastController, ActionSheetController  } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {  ModalController, LoadingController, ToastController } from '@ionic/angular';
+import {  ModalController, LoadingController, ToastController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../models/product.model';
 import { PurchaseRequestService } from 'src/app/services/purchase-request.service';

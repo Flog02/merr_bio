@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, ToastController} from '@ionic/angular';
+import { AlertController, ToastController} from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../services/product.service';

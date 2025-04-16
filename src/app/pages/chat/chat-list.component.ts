@@ -51,14 +51,11 @@ import { ModalController } from '@ionic/angular/standalone';
         </ion-item>
       </ion-list>
       
-      <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button (click)="startNewChat()">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
-      </ion-fab> -->
-      <button (click)="startNewChat()">
-kliko
-      </button>
+      </ion-fab>
     </ion-content>
   `,
   styles: [`

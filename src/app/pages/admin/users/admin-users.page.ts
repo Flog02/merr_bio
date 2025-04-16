@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {  AlertController, ToastController, ActionSheetController } from '@ionic/angular';
+import {  AlertController, ToastController, ActionSheetController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, combineLatest, map, startWith } from 'rxjs';
