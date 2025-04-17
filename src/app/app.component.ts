@@ -25,6 +25,7 @@ import { LanguageSelectorComponent } from "./components/language-selector/langua
   templateUrl: 'app.component.html',
   standalone: true,
   imports: [IonFooter, RouterLinkActive,
+    RouterLink,
     CommonModule,
     RouterLink,
     IonApp,

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router,RouterLink } from '@angular/router';
 import { AlertController, ToastController} from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../../models/product.model';
@@ -12,7 +12,7 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
 @Component({
   selector: 'app-admin-product-detail',
   standalone: true,
-  imports: [CommonModule, TranslatePipe,IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, IonImg, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
+  imports: [RouterLink,CommonModule, TranslatePipe,IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, IonImg, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -55,14 +55,19 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
     </ion-card>
 
     <ion-card *ngIf="farmer">
-      <ion-card-header>
-        <ion-card-title>{{ 'FARMER_INFORMATION' | translate }}</ion-card-title>
-      </ion-card-header>
+     <ion-card-header class="card-header-with-icon">
+  <ion-card-title>{{ 'FARMER_INFORMATION' | translate }}</ion-card-title>
+
+</ion-card-header>
       <ion-card-content>
         <p><strong>{{ 'NAME' | translate }}:</strong> {{ farmer.displayName }}</p>
         <p><strong>{{ 'EMAIL' | translate }}:</strong> {{ farmer.email }}</p>
         <p><strong>{{ 'PHONE' | translate }}:</strong> {{ farmer.phoneNumber }}</p>
         <p><strong>{{ 'LOCATION' | translate }}:</strong> {{ farmer.location }}</p>
+        <div [routerLink]="['/farmers/',farmer.uid]"   class="profile-check">
+    {{ 'CHECK_PROFILE' | translate }}
+    <ion-icon name="arrow-forward-outline"></ion-icon>
+  </div>
       </ion-card-content>
     </ion-card>
 
@@ -126,6 +131,8 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
       border-top-left-radius: 0;
       border-top-right-radius: 0;
     }
+
+    
     
     ion-card-header {
       padding: var(--spacing-md) var(--spacing-md) 0;
@@ -148,6 +155,10 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
         justify-content: space-between;
         margin-bottom: var(--spacing-xs);
       }
+    }
+    .profile-check{
+      justify-self:end;
+      cursor:pointer;
     }
     
     ion-card-content {

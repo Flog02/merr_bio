@@ -7,4 +7,5 @@ export interface User {
   location?: string;
   createdAt?: Date;
   profileImage?: string; // URL to profile image
+  // phoneVerified:any;
 }

@@ -40,6 +40,7 @@ import { Timestamp } from '@angular/fire/firestore';
   selector: 'app-product-detail',
   standalone: true,
   imports: [
+    RouterLink,
     IonSpinner,
     CommonModule,
     TranslatePipe,
@@ -71,7 +72,7 @@ import { Timestamp } from '@angular/fire/firestore';
       <h1 class="product-title">{{ product.name }}</h1>
       <div class="product-price">{{ product.price }} ALL<span class="unit">/{{ product.unit }}</span></div>
       
-      <div class="farmer-section" *ngIf="farmer">
+      <div class="farmer-section" *ngIf="farmer"[routerLink]="['/farmers', farmer.uid]"  >
         <div class="farmer-avatar">
           <img src="assets/farmer-placeholder.jpg" alt="{{ farmer.displayName }}">
         </div>
@@ -79,10 +80,12 @@ import { Timestamp } from '@angular/fire/firestore';
           <div class="farmer-name">{{ farmer.displayName }}</div>
           <div class="farmer-location" *ngIf="farmer.location">{{ farmer.location }}</div>
         </div>
+        <ion-icon name="chevron-forward-outline" class="view-profile-icon"></ion-icon>
+
       </div>
       <ion-button expand="block" fill="outline" *ngIf="currentUser?.role === 'customer'" (click)="startChat()">
   <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
-  Message Farmer
+  {{ 'MESSAGE_FARMER' | translate }}
 </ion-button>
       
       <div class="product-details">
@@ -96,8 +99,8 @@ import { Timestamp } from '@angular/fire/firestore';
           </div>
           <div class="meta-item">
             <span class="label">{{ 'CATEGORY' | translate }}:</span>
-            <span class="value">{{ product.category }}</span>
-          </div>
+            <span class="value">{{ product.category | uppercase | translate }}</span>
+            </div>
           <div class="meta-item" *ngIf="product.timestamp">
             <span class="label">{{ 'POSTED_ON' | translate }}:</span>
             <span class="value">{{ formatTimestamp(product.timestamp) }}</span>
@@ -113,7 +116,7 @@ import { Timestamp } from '@angular/fire/firestore';
             class="quantity-option" 
             [class.active]="selectedQuantity === qty"
             (click)="selectQuantity(qty)">
-            {{ qty }} {{ product.unit }}
+            {{ qty }} {{ product.unit  | uppercase | translate }}
           </div>
         </div>
       </div>
@@ -206,15 +209,15 @@ import { Timestamp } from '@angular/fire/firestore';
         margin-left: 4px;
       }
       
-      &::after {
-        content: '';
-        display: block;
-        width: 40px;
-        height: 2px;
-        background-color: var(--ion-color-primary);
-        margin-left: var(--spacing-md);
-        opacity: 0.5;
-      }
+      // &::after {
+      //   content: '';
+      //   display: block;
+      //   width: 40px;
+      //   height: 2px;
+      //   background-color: var(--ion-color-primary);
+      //   margin-left: var(--spacing-md);
+      //   opacity: 0.5;
+      // }
     }
     
     .farmer-section {

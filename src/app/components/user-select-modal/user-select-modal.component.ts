@@ -5,16 +5,18 @@ import { Observable } from 'rxjs';
 import { User } from '../../models/user.model';
 import { UserService } from '../../services/user.service';
 import{IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
+import { TranslatePipe } from "../../pipes/translate.pipe";
 
 
 @Component({
   selector: 'app-user-select-modal',
   standalone: true,
-  imports: [CommonModule,CommonModule, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
+  imports: [CommonModule, CommonModule, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar, TranslatePipe],
   template: `
     <ion-header>
       <ion-toolbar>
-        <ion-title>Select {{ userType === 'farmer' ? 'Farmer' : 'Customer' }}</ion-title>
+        <ion-title>  {{ 'SELECT' | translate }} {{ (userType === 'farmer' ? 'FARMER' : 'CUSTOMER') | translate }}
+</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="dismiss()">
             <ion-icon name="close"></ion-icon>

@@ -13,12 +13,12 @@
         <ion-list id="menu-list" class="menu-list">
           <ion-menu-toggle auto-hide="false">
             <!-- Main navigation -->
-            <ion-item routerLink="/" routerDirection="root" lines="none" detail="false" routerLinkActive="selected" [routerLinkActiveOptions]="{exact: true}">
+            <ion-item style="cursor: pointer;" routerLink="/" routerDirection="root" lines="none" detail="false" routerLinkActive="selected" [routerLinkActiveOptions]="{exact: true}">
               <ion-icon slot="start" name="home-outline"></ion-icon>
               <ion-label>{{ 'HOME' | translate }}</ion-label>
             </ion-item>
             
-            <ion-item routerLink="/products" routerDirection="root" lines="none" detail="false" routerLinkActive="selected" [routerLinkActiveOptions]="{exact: true}">
+            <ion-item style="cursor: pointer;" routerLink="/products" routerDirection="root" lines="none" detail="false" routerLinkActive="selected" [routerLinkActiveOptions]="{exact: true}">
               <ion-icon slot="start" name="grid-outline"></ion-icon>
               <ion-label>{{ 'PRODUCTS' | translate }}</ion-label>
             </ion-item>
@@ -29,12 +29,12 @@
                 <div class="menu-section-title">{{ 'ACCOUNT' | translate }}</div>
               </div>
               
-              <ion-item routerLink="/login" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/login" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="log-in-outline"></ion-icon>
                 <ion-label>{{ 'LOGIN' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/register" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/register" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="person-add-outline"></ion-icon>
                 <ion-label>{{ 'REGISTER' | translate }}</ion-label>
               </ion-item>
@@ -46,12 +46,12 @@
                 <div class="menu-section-title">{{ 'CUSTOMER_AREA' | translate }}</div>
               </div>
               
-              <ion-item routerLink="/customer/dashboard" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/customer/dashboard" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="speedometer-outline"></ion-icon>
                 <ion-label>{{ 'CUSTOMER_DASHBOARD' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/customer/requests" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/customer/requests" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="cart-outline"></ion-icon>
                 <ion-label>{{ 'MY_REQUESTS' | translate }}</ion-label>
               </ion-item>
@@ -62,7 +62,8 @@
               routerDirection="root" 
               lines="none" 
               detail="false" 
-              routerLinkActive="selected">
+              routerLinkActive="selected"
+              style="cursor: pointer;">
               <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
               <ion-label>{{ 'MESSAGES' | translate }}</ion-label>
             </ion-item>
@@ -74,22 +75,23 @@
                 <div class="menu-section-title">{{ 'FARMER_AREA' | translate }}</div>
               </div>
               
-              <ion-item routerLink="/farmer/dashboard" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/farmer/dashboard" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="speedometer-outline"></ion-icon>
                 <ion-label>{{ 'FARMER_DASHBOARD' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/farmer/products/new" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/farmer/products/new" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="add-circle-outline"></ion-icon>
                 <ion-label>{{ 'ADD_PRODUCT' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/farmer/requests" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/farmer/requests" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="list-circle-outline"></ion-icon>
                 <ion-label>{{ 'PURCHASE_REQUESTS' | translate }}</ion-label>
               </ion-item>
               
               <ion-item 
+              style="cursor: pointer;"
               *ngIf="currentUser?.role === 'farmer'" 
               routerLink="/farmer/chats" 
               routerDirection="root" 
@@ -102,17 +104,17 @@
             </ng-container>
             
             <!-- Admin options -->
-            <ng-container *ngIf="currentUser?.role === 'admin'">
+            <ng-container  *ngIf="currentUser?.role === 'admin'">
               <div class="menu-section">
                 <div class="menu-section-title">{{ 'ADMIN_AREA' | translate }}</div>
               </div>
               
-              <ion-item routerLink="/admin/dashboard" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/admin/dashboard" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="shield-outline"></ion-icon>
                 <ion-label>{{ 'ADMIN_DASHBOARD' | translate }}</ion-label>
               </ion-item>
               
-              <ion-item routerLink="/admin/users" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item style="cursor: pointer;" routerLink="/admin/users" routerDirection="root" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon slot="start" name="people-outline"></ion-icon>
                 <ion-label>{{ 'MANAGE_USERS' | translate }}</ion-label>
               </ion-item>
@@ -131,7 +133,8 @@ routerLink="/admin/profile"
 routerDirection="root" 
 lines="none" 
 detail="false" 
-routerLinkActive="selected">
+routerLinkActive="selected"
+style="cursor: pointer;">
 
 <ion-icon slot="start" name="person-outline"></ion-icon>
 <ion-label>{{ 'PROFILE' | translate }}</ion-label>
@@ -147,7 +150,7 @@ detail="false"
 routerLinkActive="selected">
 
 <ion-icon slot="start" name="person-outline"></ion-icon>
-<ion-label>{{ 'PROFILE' | translate }}</ion-label>
+<ion-label style="cursor: pointer;"> {{ 'PROFILE' | translate }}</ion-label>
 </ion-item>
 
 <!-- Farmer -->
@@ -157,15 +160,16 @@ routerLink="/farmer/profile"
 routerDirection="root" 
 lines="none" 
 detail="false" 
-routerLinkActive="selected">
+routerLinkActive="selected"
+style="cursor: pointer;">
 
 <ion-icon slot="start" name="person-outline"></ion-icon>
-<ion-label>{{ 'PROFILE' | translate }}</ion-label>
+<ion-label style="cursor: pointer;">{{ 'PROFILE' | translate }}</ion-label>
 </ion-item>
               
               <ion-item (click)="logout()" lines="none" detail="false" class="logout-item">
                 <ion-icon slot="start" name="log-out-outline"></ion-icon>
-                <ion-label>{{ 'LOGOUT' | translate }}</ion-label>
+                <ion-label style="cursor: pointer;">{{ 'LOGOUT' | translate }}</ion-label>
               </ion-item>
             </ng-container>
           </ion-menu-toggle>
@@ -173,18 +177,18 @@ routerLinkActive="selected">
           <!-- Language selector -->
           <div class="menu-section">
             
-            <div class="menu-section-title">{{ 'SETTINGS' | translate }}          <ion-icon slot="start" name="settings-outline"></ion-icon>
+            <div  class="menu-section-title">{{ 'SETTINGS' | translate }}          <ion-icon slot="start" name="settings-outline"></ion-icon>
             </div>
           </div>
           
-          <app-language-selector></app-language-selector>
+          <app-language-selector style="cursor: pointer;"></app-language-selector>
           
         </ion-list>
        
       </ion-content>
       <ion-footer class="ion-no-border">
         <div class="copyright-container">
-          <p class="copyright-text" style="margin-left: 5px;">&copy; 2025 sdi. All rights reserved.</p>
+          <p class="copyright-text" style="margin-left: 5px;">&copy; 2025 FGY. All rights reserved.</p>
         </div>
       </ion-footer>
       

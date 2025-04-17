@@ -9,7 +9,34 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
-      
+      'ADD_TO_CART':'Add to cart',
+      "SELECT": "Select",
+
+      'MESSAGE_FARMER':'Message Farmer',
+      'ALREADY_HAVE_ACCOUNT':'Already have Account',
+      'PURCHASE_REQUESTS':'Purchase Request',
+      'DESCRIPTION_REQUIRED':'Description is Required',
+      "PRICE_ALL": "Price (ALL)",
+      "PRICE_REQUIRED": "Price is required",
+      "PRICE_MIN": "Price must be greater than 0",
+    
+      "QUANTITY_REQUIRED": "Quantity is required",
+      "QUANTITY_MIN": "Quantity must be greater than 0",
+    
+      "UNIT_REQUIRED": "Unit is required",
+      "KG": "Kg",
+      "LITER": "Liter",
+      "PIECE": "Piece",
+      "BUNCH": "Bunch",
+    
+      "UPDATE_PRODUCT": "Update Product",
+      'FARMER_PRODUCTS':'Farmer Products',
+      'VERIFIED_FARMER':'Verified Farmer',
+      'CREATED_AT':'Created A',
+      'FARMER_INFORMATION':'Farmer Information',
+      'CHECK_PROFILE':'Check Profile',
+      'DELETE_PRODUCT':'Delete Product',
+      'APPROVE_PRODUCT':'Approve Product',
       'MY_PROFILE':'My Profile',
       'HOW_IT_WORKS':'HOW IT WORKS',
       'LOGOUT': 'Logout',
@@ -138,6 +165,43 @@ export class LanguageService {
     },
     sq: {
       // Common
+      "SELECT": "Zgjidh",
+"NO_REQUESTS_YET": "Asnjë kërkesë ende",
+  "NO_REQUESTS": "Asnjë kërkesë",
+      'ADD_TO_CART':'Shto ne shporte',
+      'MESSAGE_FARMER':'Shkruaj Fermerit',
+
+      'ALREADY_HAVE_ACCOUNT':'Keni account',
+      'PURCHASE_REQUESTS':'Kerkese Blerje',
+
+      'SELECT_ALL': 'Select All',
+      'SELECT_NONE': 'Select None',
+
+      'DESCRIPTION_REQUIRED':'Vendos Pershkrimin',
+
+      'DESCRIPTION':'Pershkrimi',
+      "PRICE_ALL": "Cmimi (ALL)",
+      "PRICE_REQUIRED": "Vendos Cmimin",
+      "PRICE_MIN": "Cmimi duhet me i madhe se 0",
+    
+      "QUANTITY_REQUIRED": "Vendos Sasin",
+      "QUANTITY_MIN": "Sasia duhet me i madhe se 0",
+    
+      "UNIT_REQUIRED": "Vendos Njesin",
+      "KG": "Kg",
+      "LITER": "Liter",
+      "PIECE": "Cope",
+      "BUNCH": "Tufe",
+    
+      "UPDATE_PRODUCT": "Ndrysho Produktin",
+      "CATEGORY_REQUIRED": "Vendos Kategorin",
+      'FARMER_PRODUCTS':'Produktet e Fermerit',
+      'VERIFIED_FARMER':'Verifikuar',
+      'CREATED_AT':'Data e Krijimit',
+      'FARMER_INFORMATION':'Informacionet e Fermerit',
+      'CHECK_PROFILE':'Shiko Profilin',
+      'DELETE_PRODUCT':'Fshi Produktin',
+      'APPROVE_PRODUCT':'Aprovo Produktin',
       'LANGUAGE':'Gjuha',
       'MY_PROFILE':'Profili Im',
             'HOW_IT_WORKS':'Si Perdoret',
@@ -172,8 +236,8 @@ export class LanguageService {
       // Products
       'PRODUCTS': 'Produktet',
       'ALL': 'Të gjitha',
-      'FRUITS': 'Frutat',
-      'VEGETABLES': 'Perimet',
+      'FRUITS': 'Fruta',
+      'VEGETABLES': 'Perime',
       'DAIRY': 'Bulmet',
       'HONEY': 'Mjaltë',
       'WINE': 'Verë',
@@ -182,7 +246,6 @@ export class LanguageService {
       'PRICE': 'Çmimi',
       'QUANTITY': 'Sasia',
       'UNIT': 'Njësia',
-      'DESCRIPTION': 'Përshkrimi',
       'AVAILABILITY': 'Disponueshmëria',
       'CATEGORY': 'Kategoria',
   
