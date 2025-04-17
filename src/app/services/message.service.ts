@@ -1,13 +1,34 @@
-import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, query, where, orderBy, collectionData, doc, updateDoc, getDocs, documentId, Timestamp } from '@angular/fire/firestore';
-import { Observable, from, map, switchMap, of, combineLatest } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { 
+  Firestore, 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs,
+  setDoc, 
+  updateDoc, 
+  addDoc, 
+  deleteDoc,
+  query, 
+  where, 
+  orderBy, 
+  limit, 
+  serverTimestamp, 
+  onSnapshot,
+  Timestamp,
+  DocumentData,
+  QuerySnapshot,
+  collectionData
+} from '@angular/fire/firestore';
+import { Observable, from, of, combineLatest, throwError,BehaviorSubject  } from 'rxjs';
 import { Message } from '../models/message.model';
-
+import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: Firestore, private authService : AuthService) {}
 
   sendMessage(message: Omit<Message, 'id'>): Observable<string> {
     const messagesRef = collection(this.firestore, 'messages');
@@ -79,6 +100,10 @@ export class MessageService {
   }
   // Add this method to your MessageService
 
+
+
+
+  
 getUserConversations(userId: string): Observable<any[]> {
   const messagesRef = collection(this.firestore, 'messages');
   
@@ -141,4 +166,64 @@ getUserConversations(userId: string): Observable<any[]> {
     })
   );
 }
+
+deleteConversation(currentUserId: string, otherUserId: string): Observable<void> {
+  if (!currentUserId || !otherUserId) {
+    console.error('Invalid user IDs for conversation deletion');
+    return throwError(() => new Error('Invalid user IDs'));
+  }
+  
+  // First, get reference to both conversation documents
+  const conversationRef1 = doc(
+    this.firestore, 
+    'conversations', 
+    `${currentUserId}_${otherUserId}`
+  );
+  
+  const conversationRef2 = doc(
+    this.firestore, 
+    'conversations', 
+    `${otherUserId}_${currentUserId}`
+  );
+  
+  // Get reference to the messages collection
+  const messagesQuery = query(
+    collection(this.firestore, 'messages'),
+    where('conversationId', 'in', [
+      `${currentUserId}_${otherUserId}`,
+      `${otherUserId}_${currentUserId}`
+    ])
+  );
+  
+  return from(getDocs(messagesQuery)).pipe(
+    switchMap(snapshot => {
+      const deletePromises: Promise<void>[] = [];
+      
+      // Delete all messages
+      snapshot.forEach(doc => {
+        deletePromises.push(deleteDoc(doc.ref));
+      });
+      
+      // Delete both conversation documents
+      deletePromises.push(deleteDoc(conversationRef1));
+      deletePromises.push(deleteDoc(conversationRef2));
+      
+      if (deletePromises.length === 0) {
+        return of(undefined);
+      }
+      
+      return from(Promise.all(deletePromises)).pipe(
+        map(() => undefined)
+      );
+    }),
+    catchError(error => {
+      console.error('Error deleting conversation:', error);
+      return throwError(() => new Error('Failed to delete conversation'));
+    })
+  );
+}
+
+
+
+
 }

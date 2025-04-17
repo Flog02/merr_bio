@@ -123,6 +123,7 @@ export class ProductService {
       })
     );
   }
+  
 
   // Update product
   updateProduct(id: string, data: Partial<Product>): Observable<void> {
@@ -169,38 +170,43 @@ export class ProductService {
     );
   }
   
-  // Delete all products by a specific farmer (used when deleting a user)
-  deleteProductsByFarmer(farmerId: string): Observable<void> {
-    if (!farmerId) {
-      console.error('Invalid farmerId provided for product deletion');
-      return throwError(() => new Error('Invalid farmer ID'));
-    }
-    
-    const productsRef = collection(this.firestore, 'products');
-    const q = query(productsRef, where('farmerId', '==', farmerId));
-    
-    return from(getDocs(q)).pipe(
-      switchMap((querySnapshot: QuerySnapshot<DocumentData>) => {
-        const deletePromises: Promise<void>[] = [];
-        
-        querySnapshot.forEach((docSnapshot: DocumentSnapshot<DocumentData>) => {
-          deletePromises.push(deleteDoc(doc(this.firestore, 'products', docSnapshot.id)));
-        });
-        
-        if (deletePromises.length === 0) {
-          console.log(`No products found for farmer ${farmerId}`);
-          return of(undefined);
-        }
-        
-        // Use from() to convert Promise to Observable
-        return from(Promise.all(deletePromises)).pipe(
-          map(() => undefined) // Convert to void return type
-        );
-      }),
-      catchError(error => {
-        console.error(`Error deleting products for farmer ${farmerId}:`, error);
-        return throwError(() => new Error('Failed to delete farmer products'));
-      })
-    );
+  // Fixed version with proper TypeScript typing
+deleteProductsByFarmer(farmerId: string): Observable<void> {
+  if (!farmerId) {
+    console.error('Invalid farmerId provided for product deletion');
+    return throwError(() => new Error('Invalid farmer ID'));
   }
+  
+  const productsRef = collection(this.firestore, 'products');
+  const q = query(productsRef, where('farmerId', '==', farmerId));
+  
+  return from(getDocs(q)).pipe(
+    switchMap((querySnapshot: QuerySnapshot<DocumentData>) => {
+      // If no products found, return completed Observable
+      if (querySnapshot.empty) {
+        console.log(`No products found for farmer ${farmerId}`);
+        return of(undefined);
+      }
+      
+      // Convert the docs array to an Observable
+      const docs = querySnapshot.docs;
+      
+      // Create an Observable chain that processes each deletion sequentially
+      return docs.reduce(
+        (acc$: Observable<unknown>, docSnapshot) => 
+          acc$.pipe(
+            switchMap(() => {
+              console.log(`Deleting product: ${docSnapshot.id}`);
+              return from(deleteDoc(doc(this.firestore, 'products', docSnapshot.id)));
+            })
+          ),
+        of(undefined) // Start with an empty Observable
+      ) as Observable<void>;
+    }),
+    catchError(error => {
+      console.error(`Error deleting products for farmer ${farmerId}:`, error);
+      return throwError(() => new Error(`Failed to delete farmer products: ${error.message}`));
+    })
+  );
+}
 }

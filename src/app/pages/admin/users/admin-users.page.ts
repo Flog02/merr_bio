@@ -196,16 +196,19 @@ export class AdminUsersPage implements OnInit {
     await alert.present();
   }
   
-  async deleteUser(user: User) {
-    try {
-      await this.userService.deleteUser(user.uid);
-      this.showToast(`User ${user.displayName || user.email} deleted successfully`, 'success');
-      // Reload users
-      this.loadUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      this.showToast('Failed to delete user', 'danger');
-    }
+  deleteUser(user: User) {
+    // Use the Observable pattern with subscribe() instead of async/await
+    this.userService.deleteUser(user.uid).subscribe({
+      next: () => {
+        this.showToast(`User ${user.displayName || user.email} deleted successfully`, 'success');
+        // Reload users
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('Error deleting user:', error);
+        this.showToast('Failed to delete user', 'danger');
+      }
+    });
   }
   
   async showUserOptions(user: User) {

@@ -24,9 +24,10 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {search,water,close, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical, chevronForwardOutline, arrowForwardOutline } from 'ionicons/icons';
+import {alertCircle,search,water,close, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical, chevronForwardOutline, arrowForwardOutline } from 'ionicons/icons';
 
 addIcons({
+  'alert-circle':alertCircle,
   'arrow-forward-outline':arrowForwardOutline,
   'chevron-forward-outline':chevronForwardOutline,
   'home':home,

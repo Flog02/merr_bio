@@ -7,7 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import {IonRadio,IonRadioGroup,IonListHeader,IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar,IonInput}from '@ionic/angular/standalone'
 import { FormControl } from '@angular/forms';
-
+import {AlertController} from '@ionic/angular/standalone'
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -106,6 +106,7 @@ export class RegisterPage {
     private formBuilder: FormBuilder,
     // private formControl:FormControl,
     // private formGroup:FormGroup,
+    private alertController : AlertController,
     private authService: AuthService,
     private router: Router,
     private toastController: ToastController
@@ -180,19 +181,26 @@ export class RegisterPage {
       })
       .catch(error => {
         console.error('Registration error', error);
-        // Handle registration error (show toast or alert)
-        this.showErrorToast(error.message);
+        
+        // Check for specific Firebase error codes
+        if (error.code === 'auth/email-already-in-use') {
+          this.presentAlert('Email Already Exists', 'This email address is already registered. Please try a different one.');
+        } else {
+          // Generic error handling for other errors
+          this.presentAlert('Registration Error', error.message || 'An error occurred during registration. Please try again.');
+        }
       });
   }
+
   
-  async showErrorToast(message: string) {
-    const toast = await this.toastController.create({
-      message: message || 'Registration failed. Please try again.',
-      duration: 3000,
-      color: 'danger',
-      position: 'bottom'
-    });
-    
-    await toast.present();
-  }
+  async presentAlert(header: string, message: string) {
+  const alert = await this.alertController.create({
+    header,
+    message,
+    buttons: ['OK'],
+    cssClass: 'registration-alert'
+  });
+
+  await alert.present();
+}
 }
