@@ -30,7 +30,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
           <ion-input #emailInput type="email" formControlName="email"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isEmailInvalid()">
-          Please enter a valid email address
+         {{'Please_enter_a_valid_email_address'| translate}}
         </div>
 
         <!-- Password field -->
@@ -39,7 +39,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
           <ion-input #passwordInput type="password" formControlName="password"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isPasswordEmpty()">
-          Password is required
+          {{'Password is required'| translate}}
         </div>
 
         <!-- Authentication error message -->
@@ -54,7 +54,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       </form>
 
       <div class="ion-text-center ion-padding-top">
-        <p>Don't have an account? <a routerLink="/register">Register</a></p>
+        <p>{{"Don't have an account?"|translate}} <a routerLink="/register">Register</a></p>
       </div>
     </ion-content>
   `,
@@ -162,7 +162,7 @@ export class LoginPage {
         // Handle specific authentication errors
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
           this.authError = 'Invalid email or password';
-        } else if (error.code === 'auth/invalid-email') {
+        } else if (error.code === 'auth/invalid-email'|| error.code=== 'auth/invalid-credential') {
           this.authError = 'Please enter a valid email address';
         } else {
           this.authError = 'Login failed. Please try again.';

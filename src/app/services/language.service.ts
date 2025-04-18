@@ -9,9 +9,14 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
+      'VIEW':'VIEW',
+      'PASSWORD_MIN_LENGTH':'Password too short',
+      'EMAIL_INVALID':'Email Invalid',
+      "Don't have an account?":"Don't have an account?",
+      'Password is required':'Password is required',
       'ADD_TO_CART':'Add to cart',
       "SELECT": "Select",
-
+      'Please_enter_a_valid_email_address':'Please enter a valid email address',
       'MESSAGE_FARMER':'Message Farmer',
       'ALREADY_HAVE_ACCOUNT':'Already have Account',
       'PURCHASE_REQUESTS':'Purchase Request',
@@ -161,10 +166,20 @@ export class LanguageService {
       'NO_PRODUCTS_FOUND': 'No products found',
       'TRY_DIFFERENT_FILTER': 'Try a different filter or search term',
       'SEARCH_PRODUCTS': 'Search products...',
-      'SEARCH_USERS': 'Search users...'
+      'SEARCH_USERS': 'Search users...',
+      'purchase_request':'Purchase Request',
+      'purchase_request_message':'Purchase request message'
     },
     sq: {
       // Common
+      'purchase_request_message':'Mesazh per kërkese blerjeje',
+      'purchase_request':'Kerko per te blere',
+      'VIEW':'Shiko',
+      'PASSWORD_MIN_LENGTH':'Password i shkurter',
+      'EMAIL_INVALID':'Email i gabuar',
+      "Don't have an account?":"Nuk keni account?",
+      'Password is required':'Vendosni passwordin',
+      'Please_enter_a_valid_email_address':'Ju lutem vendoseni emailin te sakte',
       "SELECT": "Zgjidh",
 "NO_REQUESTS_YET": "Asnjë kërkesë ende",
   "NO_REQUESTS": "Asnjë kërkesë",

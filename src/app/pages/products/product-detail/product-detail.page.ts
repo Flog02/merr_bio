@@ -70,7 +70,7 @@ import { Timestamp } from '@angular/fire/firestore';
     <!-- Product Info -->
     <div class="product-container" style="margin-bottom: 35px;">
       <h1 class="product-title">{{ product.name }}</h1>
-      <div class="product-price">{{ product.price }} ALL<span class="unit">/{{ product.unit }}</span></div>
+      <div class="product-price">{{ product.price }} ALL<span class="unit">/{{ product.unit |uppercase|translate }}</span></div>
       
       <div class="farmer-section" *ngIf="farmer"[routerLink]="['/farmers', farmer.uid]"  >
         <div class="farmer-avatar">
@@ -95,7 +95,7 @@ import { Timestamp } from '@angular/fire/firestore';
         <div class="product-meta">
           <div class="meta-item">
             <span class="label">{{ 'AVAILABLE' | translate }}:</span>
-            <span class="value">{{ product.quantity }} {{ product.unit }}</span>
+            <span class="value">{{ product.quantity }} {{ product.unit|uppercase|translate }}</span>
           </div>
           <div class="meta-item">
             <span class="label">{{ 'CATEGORY' | translate }}:</span>
