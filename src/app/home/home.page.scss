@@ -235,3 +235,33 @@ ion-header {
 --scroll-bar-background{
   background-color: white;
 }
+.adminsupport{
+  position: fixed;
+  z-index: 9999;
+  width: 96%;
+  text-align: end;
+  bottom: 15px;
+  ion-button {
+    --opacity: 0.8;
+
+    --background: #e77e7c;  /* A slightly more refined red */
+    --background-activated: #b71c1c;  /* Even darker when clicked */
+    --transition: all 0.4s ease;  /* Smooth transitions */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;  /* Semi-bold text */
+font-size: 10px;
+  }
+    
+    
+    /* For hover effects (works on web) */
+    ion-button:hover {
+      --opacity: 0.9;
+      --background: #620505;  /* Darker red on hover */
+      --box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+    }
+}
+
+ 
+

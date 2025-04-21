@@ -118,6 +118,17 @@
                 <ion-icon slot="start" name="people-outline"></ion-icon>
                 <ion-label>{{ 'MANAGE_USERS' | translate }}</ion-label>
               </ion-item>
+              <ion-item 
+              style="cursor: pointer;"
+              *ngIf="currentUser?.role === 'admin'" 
+              routerLink="admin/support-chats" 
+              routerDirection="root" 
+              lines="none" 
+              detail="false" 
+              routerLinkActive="selected">
+              <ion-icon slot="start" name="chatbubbles-outline"></ion-icon>
+              <ion-label>{{ 'MESSAGES' | translate }}</ion-label>
+            </ion-item>
             </ng-container>
             
             <!-- Authenticated user options -->

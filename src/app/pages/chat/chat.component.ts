@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {  LoadingController, ToastController, ActionSheetController  } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -14,7 +14,6 @@ import { Timestamp } from '@angular/fire/firestore';
 import {IonInput,IonFooter,IonBackButton,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar}from '@ionic/angular/standalone'
 import { ModalController } from '@ionic/angular/standalone';
 
-
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -26,14 +25,14 @@ import { ModalController } from '@ionic/angular/standalone';
           <ion-back-button defaultHref="/chats"></ion-back-button>
         </ion-buttons>
         <ion-title *ngIf="otherUser">
-          <div class="chat-title">
-            <div *ngIf="otherUser.profileImage" class="user-avatar">
-              <img [src]="otherUser.profileImage" alt="{{ otherUser.displayName }}">
+          <div class="chat-title" >
+            <div *ngIf="otherUser.profileImage" class="user-avatar"  >
+              <img [src]="otherUser.profileImage" alt="{{ otherUser.displayName }}"  (click)="checkProfile(otherUserId)" style="cursor:pointer">
             </div>
-            <div *ngIf="!otherUser.profileImage" class="user-avatar placeholder">
+            <div *ngIf="!otherUser.profileImage" class="user-avatar placeholder" (click)="checkProfile(otherUserId)" style="cursor:pointer">
               <ion-icon name="person"></ion-icon>
             </div>
-            <div class="user-info">
+            <div class="user-info" (click)="checkProfile(otherUserId)" style="cursor:pointer">
               <div class="user-name">{{ otherUser.displayName || 'User' }}</div>
               <div class="user-status" *ngIf="isOnline">Online</div>
             </div>
@@ -351,7 +350,8 @@ export class ChatComponent implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController,
-    private modalController:ModalController
+    private modalController:ModalController,
+    private router:Router
   ) {}
 
   ngOnInit() {
@@ -475,6 +475,16 @@ export class ChatComponent implements OnInit {
     });
     
     await actionSheet.present();
+  }
+  checkProfile(otherUserId:any){
+    if(this.otherUser?.role==='farmer' ){
+      this.router.navigate([`/farmers`,otherUserId]);
+
+    }else{
+    console.log('You are not authorized to view this profile.');
+
+    }
+    
   }
   
   onFileSelected(event: any) {

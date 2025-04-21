@@ -23,6 +23,17 @@
     </ng-container>
   </div>
 
+  <div>
+
+    <div class="adminsupport" *ngIf="currentUser?.role!=='admin'">
+      <ion-button (click)="chatAdmin()">
+        <ion-icon name="help-circle-outline"></ion-icon>
+
+        {{'SUPPORT'| translate}}
+      </ion-button>
+      </div>
+    
+
   <!-- Featured Products -->
   <div class="featured-section">
     <div  class="section-header">
@@ -79,10 +90,15 @@
     </ion-grid>
   </div>
 
+
   <!-- How it works -->
   <div class="how-it-works-container">
     <h2>{{ 'HOW_IT_WORKS' | translate }}</h2>
     
+
+
+
+
     <ion-grid>
       <ion-row>
         <ion-col size="12" size-md="4">
@@ -111,5 +127,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
+  </div>
+
   </div>
 </ion-content>

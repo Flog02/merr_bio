@@ -8,4 +8,6 @@ export interface Message {
   imageUrl?: string;
   timestamp: Timestamp;
   read: boolean;
+  // isAdminMessage?: boolean; // Add this optional property
+
 }

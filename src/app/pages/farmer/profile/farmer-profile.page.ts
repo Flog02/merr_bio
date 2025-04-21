@@ -7,10 +7,11 @@ import { UserService } from '../../../services/user.service';
 import { User } from '../../../models/user.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-farmer-profile',
   standalone: true,
-  imports: [IonInput,IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [FormsModule,IonInput,IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -48,10 +49,18 @@ import { Router } from '@angular/router';
         <ion-input formControlName="email" readonly></ion-input>
       </ion-item>
       
-      <ion-item>
+      <ion-item >
         <ion-label position="floating">{{ 'PHONE' | translate }}</ion-label>
         <ion-input type="tel" formControlName="phoneNumber"></ion-input>
       </ion-item>
+
+
+      <!-- SHARE_PHONE_NUMBER -->
+
+      <!-- <ion-item>
+  <ion-label>{{ 'SHARE_PHONE_NUMBER' | translate }}</ion-label>
+  <ion-toggle [(ngModel)]="sharePhoneNumber" [ngModelOptions]="{standalone: true}"></ion-toggle>
+</ion-item> -->
       
       <ion-item>
         <ion-label position="floating">{{ 'LOCATION' | translate }}</ion-label>
@@ -272,7 +281,7 @@ import { Router } from '@angular/router';
 export class FarmerProfilePage implements OnInit {
   profileForm!: FormGroup;
   currentUser: User | null = null;
-
+  // sharePhoneNumber=false;
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
