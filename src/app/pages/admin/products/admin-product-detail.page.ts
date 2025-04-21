@@ -32,10 +32,51 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
 
 <ion-content>
   <div *ngIf="product" class="fade-in">
-    <ion-img 
-      src="assets/product-placeholder.jpg" 
-      alt="{{ product.name }}">
-    </ion-img>
+  <!-- Product Image Gallery -->
+  <div class="product-image-gallery">
+      <!-- When there are multiple images, show as gallery -->
+      <div *ngIf="product.images && product.images.length > 0" class="gallery-container">
+        <div class="main-image">
+          <img [src]="currentImageUrl" alt="{{ product.name }}">
+          
+          <!-- Navigation arrows (only if multiple images) -->
+          <div *ngIf="product.images.length > 1" class="gallery-navigation">
+            <button class="nav-button prev" (click)="prevImage()">
+              <ion-icon name="chevron-back"></ion-icon>
+            </button>
+            <button class="nav-button next" (click)="nextImage()">
+              <ion-icon name="chevron-forward"></ion-icon>
+            </button>
+          </div>
+          
+          <!-- Image indicator dots -->
+          <div *ngIf="product.images.length > 1" class="image-indicators">
+            <span 
+              *ngFor="let image of product.images; let i = index" 
+              class="indicator-dot"
+              [class.active]="i === currentImageIndex"
+              (click)="setCurrentImage(i)">
+            </span>
+          </div>
+        </div>
+        
+        <!-- Thumbnail strip (when more than 1 image) -->
+        <div *ngIf="product.images.length > 1" class="thumbnail-strip">
+          <div 
+            *ngFor="let image of product.images; let i = index" 
+            class="thumbnail"
+            [class.active]="i === currentImageIndex"
+            (click)="setCurrentImage(i)">
+            <img [src]="image" alt="Thumbnail">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fallback to placeholder if no images -->
+      <div *ngIf="!product.images || product.images.length === 0" class="product-image">
+        <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+      </div>
+    </div>
 
     <ion-card>
       <ion-card-header>
@@ -92,6 +133,143 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
   </div>
 </ion-content>`,
   styles:`
+  .product-image-gallery {
+      width: 100%;
+      height: 320px;
+      position: relative;
+      overflow: hidden;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+      }
+      
+      .gallery-container {
+        width: 100%;
+        height: 100%;
+      }
+      
+      .main-image {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: var(--transition);
+        }
+        
+        .gallery-navigation {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 var(--spacing-md);
+          pointer-events: none;
+          
+          .nav-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: var(--transition);
+            
+            &:hover {
+              background: rgba(0, 0, 0, 0.7);
+            }
+            
+            ion-icon {
+              font-size: 20px;
+            }
+          }
+        }
+        
+        .image-indicators {
+          position: absolute;
+          bottom: var(--spacing-md);
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 8px;
+          z-index: 2;
+          
+          .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: var(--transition);
+            
+            &.active {
+              background: white;
+              transform: scale(1.2);
+            }
+          }
+        }
+      }
+      
+      .thumbnail-strip {
+        position: absolute;
+        bottom: var(--spacing-sm);
+        left: var(--spacing-md);
+        right: var(--spacing-md);
+        display: flex;
+        gap: 8px;
+        z-index: 2;
+        overflow-x: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        
+        &::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+        
+        .thumbnail {
+          width: 48px;
+          height: 48px;
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          border-radius: 4px;
+          overflow: hidden;
+          cursor: pointer;
+          flex-shrink: 0;
+          transition: var(--transition);
+          
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          
+          &.active {
+            border-color: white;
+            transform: scale(1.1);
+          }
+          
+          &:hover:not(.active) {
+            border-color: rgba(255, 255, 255, 0.8);
+          }
+        }
+      }
+    }
   ion-header {
     ion-toolbar {
       --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
@@ -225,15 +403,45 @@ export class AdminProductDetailPage implements OnInit {
   product: Product | null = null;
   farmer: User | null = null;
   isLoading = false;
-
+  currentImageIndex: number = 0;
+  get currentImageUrl(): string {
+    if (this.product?.images && this.product.images.length > 0) {
+      return this.product.images[this.currentImageIndex];
+    }
+    return 'assets/product-placeholder.jpg';
+  }
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
     private userService: UserService,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+
   ) {}
+
+    // Image gallery navigation methods
+    nextImage() {
+      if (this.product?.images && this.currentImageIndex < this.product.images.length - 1) {
+        this.currentImageIndex++;
+      } else {
+        this.currentImageIndex = 0; // Loop back to the first image
+      }
+    }
+    
+    prevImage() {
+      if (this.product?.images && this.currentImageIndex > 0) {
+        this.currentImageIndex--;
+      } else if (this.product?.images) {
+        this.currentImageIndex = this.product.images.length - 1; // Loop to the last image
+      }
+    }
+    
+    setCurrentImage(index: number) {
+      if (this.product?.images && index >= 0 && index < this.product.images.length) {
+        this.currentImageIndex = index;
+      }
+    }
 
   ngOnInit() {
     this.loadProductDetails();

@@ -24,9 +24,13 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {alertCircle,search,water,close, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical, chevronForwardOutline, arrowForwardOutline, eyeOffOutline, eyeOutline, checkmarkDoneOutline } from 'ionicons/icons';
+import {alertCircle,search,water,close, home, list, logIn, personAdd, grid, cart, chatbubbles, addCircle, listCircle, shield, logOut, arrowForward, gridOutline, homeOutline, logInOutline, personAddOutline, personOutline, chatbubblesOutline, logOutOutline, speedometerOutline, cartOutline, cubeOutline, people, trash, peopleOutline, shieldOutline, trashOutline, listCircleOutline, addCircleOutline, checkmarkCircleOutline, checkmark, notificationsOutline, checkmarkOutline, person, send, attach, add, settingsOutline, ellipsisVertical, chevronForwardOutline, arrowForwardOutline, eyeOffOutline, eyeOutline, checkmarkDoneOutline, imagesOutline, chevronForward, chevronBack, camera } from 'ionicons/icons';
 
 addIcons({
+  'camera':camera,
+  'chevron-back':chevronBack,
+  'chevron-forward':chevronForward,
+  'images-outline':imagesOutline,
   'checkmark-done-outline':checkmarkDoneOutline,
   'eye-outline':eyeOutline,
   'eye-off-outline':eyeOffOutline,
