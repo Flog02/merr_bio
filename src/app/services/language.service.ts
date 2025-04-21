@@ -9,6 +9,7 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
+      'PRODUCT_IMAGES':'Product Images',
       'PROFILE_IMAGE_HINT':'Profile Image',
       'IMAGE_GUIDANCE':'Image Guidance',
       'ADD_IMAGE':'Add Image',
@@ -177,6 +178,7 @@ export class LanguageService {
     },
     sq: {
       // Common
+      'PRODUCT_IMAGES':'Imazhet e Produktit',
       'PROFILE_IMAGE_HINT':'Foto Profili',
       'IMAGE_GUIDANCE':'Guida e Fotove',
       'ADD_IMAGE':'Shto Foto',

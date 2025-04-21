@@ -559,6 +559,7 @@ export class FarmerProfilePage implements OnInit {
     // Navigate to chat with this farmer
     this.router.navigate([`/customer/chats/${this.currentUser.uid}`]);
   }
+  
 
   onSubmit() {
     if (this.profileForm.invalid || !this.currentUser) {

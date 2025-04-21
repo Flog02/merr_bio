@@ -1,17 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import{IonInput,IonNote,IonSpinner,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar}from '@ionic/angular/standalone'
+import {
+  IonInput, IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel,
+  IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar,
+  IonIcon, IonAvatar, IonToast
+} from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../models/user.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
 @Component({
   selector: 'app-admin-profile',
   standalone: true,
-  imports: [IonInput,IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
-  template: `<ion-header class="ion-no-border">
+  imports: [
+    FormsModule, IonInput, IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel,
+    IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, IonIcon,
+    IonAvatar, IonToast, CommonModule, ReactiveFormsModule, TranslatePipe
+  ],
+    template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
@@ -23,10 +33,27 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 <ion-content>
   <div *ngIf="currentUser" class="fade-in">
     <div class="profile-header">
-      <div class="avatar">
-        <!-- <ion-icon name="person" *ngIf="!currentUser.photoURL"></ion-icon> -->
-        <!-- <img *ngIf="currentUser.photoURL" [src]="currentUser.photoURL" alt="{{ currentUser.displayName }}"> -->
-      </div>
+    <div class="avatar-container">
+          <div class="avatar" (click)="profileImageInput.click()">
+            <img *ngIf="currentUser.profileImage" [src]="currentUser.profileImage" alt="{{ currentUser.displayName }}">
+            <ion-icon *ngIf="!currentUser.profileImage" name="person" class="avatar-placeholder"></ion-icon>
+            <div class="avatar-edit-overlay">
+              <ion-icon name="camera"></ion-icon>
+            </div>
+          </div>
+          <!-- Hidden file input for profile image -->
+          <input 
+            type="file" 
+            #profileImageInput 
+            style="display: none" 
+            accept="image/*" 
+            (change)="onProfileImageSelected($event)"
+          >
+          <div *ngIf="isUploading" class="upload-progress">
+            <ion-spinner name="circles"></ion-spinner>
+            <span>{{ 'UPLOADING' | translate }}</span>
+          </div>
+        </div>
       <h1>{{ currentUser.displayName || 'Customer' }}</h1>
       <p>{{ currentUser.email }}</p>
     </div>
@@ -55,9 +82,22 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <ion-input formControlName="location"></ion-input>
       </ion-item>
       
-      <ion-button expand="block" type="submit" [disabled]="!profileForm.valid || !profileForm.dirty">
-        {{ 'SAVE' | translate }}
-      </ion-button>
+      <ion-button expand="block" type="submit" [disabled]="!profileForm.valid || !profileForm.dirty || isUploading">
+          {{ 'SAVE' | translate }}
+        </ion-button>
+
+        <ion-button 
+          *ngIf="currentUser.profileImage" 
+          expand="block" 
+          fill="outline" 
+          color="danger" 
+          class="remove-photo-btn"
+          [disabled]="isUploading"
+          (click)="removeProfileImage()"
+        >
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
+          {{ 'REMOVE_PHOTO' | translate }}
+        </ion-button>
     </form>
   </div>
   
@@ -65,8 +105,18 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     <ion-spinner></ion-spinner>
     <p>{{ 'LOADING' | translate }}</p>
   </div>
+   <!-- Toast for notifications -->
+   <ion-toast
+      [isOpen]="showToast"
+      [message]="toastMessage"
+      [color]="toastColor"
+      [duration]="3000"
+      (didDismiss)="showToast = false"
+      position="bottom"
+    ></ion-toast>
 </ion-content>`,
   styles:`
+
   ion-header {
     ion-toolbar {
       --background: var(--ion-color-primary);
@@ -106,23 +156,90 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       box-shadow: var(--box-shadow-light);
     }
     
+    .avatar-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto var(--spacing-md);
+    }
     .avatar {
-      width: 100px;
-      height: 100px;
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
       overflow: hidden;
       border: 4px solid rgba(255, 255, 255, 0.3);
-      margin: 0 auto var(--spacing-md);
+      background-color: rgba(255, 255, 255, 0.1);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
       
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
+      .avatar-placeholder {
+        font-size: 64px;
+        color: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.6);
+        
+        .avatar-edit-overlay {
+          opacity: 1;
+        }
+      }
       
       ion-icon {
         font-size: 64px;
         color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    .avatar-edit-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      height: 40%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      
+      ion-icon {
+        font-size: 24px;
+        color: white;
+      }
+    }
+    
+    .upload-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      color: white;
+      
+      ion-spinner {
+        margin-bottom: 8px;
+        color: white;
+      }
+      
+      span {
+        font-size: 0.8rem;
       }
     }
     
@@ -194,17 +311,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       height: 48px;
       letter-spacing: 0.5px;
       
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
-        opacity: 0;
-        transition: var(--transition);
-      }
+      
       
       &:hover:not(:disabled)::before {
         opacity: 1;
@@ -214,6 +321,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         --background: rgba(var(--ion-color-medium-rgb), 0.3);
         --color: rgba(var(--ion-color-medium-rgb), 0.7);
       }
+    }
+    .remove-photo-btn {
+      margin-top: var(--spacing-md);
     }
   }
   
@@ -266,13 +376,21 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   }`
 })
 export class AdminProfilePage implements OnInit {
+  @ViewChild('profileImageInput') profileImageInput!: ElementRef<HTMLInputElement>;
+
   profileForm!: FormGroup;
   currentUser: User | null = null;
+  isUploading: boolean = false;
+  selectedProfileImage: File | null = null;
+  showToast: boolean = false;
+  toastMessage: string = '';
+  toastColor: string = 'success';
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {
     this.createForm();
   }
@@ -299,6 +417,134 @@ export class AdminProfilePage implements OnInit {
       location: ['']
     });
   }
+  
+      /**
+       * Handle profile image selection from file input
+       */
+      onProfileImageSelected(event: Event) {
+        const input = event.target as HTMLInputElement;
+        
+        if (input.files && input.files.length > 0) {
+          this.selectedProfileImage = input.files[0];
+          
+          // Validate file type and size
+          if (!this.isValidImageFile(this.selectedProfileImage)) {
+            // Reset selected file
+            this.selectedProfileImage = null;
+            return;
+          }
+          
+          // Automatically upload the selected image
+          this.uploadProfileImage();
+        }
+      }
+      
+      /**
+       * Upload the selected profile image to Firebase storage
+       */
+      uploadProfileImage() {
+        if (!this.selectedProfileImage || !this.currentUser) {
+          return;
+        }
+        
+        this.isUploading = true;
+        
+        this.userService.updateProfileImage(this.currentUser.uid, this.selectedProfileImage)
+          .pipe(finalize(() => {
+            this.isUploading = false;
+            this.selectedProfileImage = null;
+          }))
+          .subscribe({
+            next: (downloadUrl) => {
+              // Update the local user object to show the new image immediately
+              if (this.currentUser) {
+                this.currentUser = {
+                  ...this.currentUser,
+                  profileImage: downloadUrl
+                };
+              }
+              
+              // Show success message
+              this.showToastMessage('Profile image updated successfully', 'success');
+            },
+            error: (error) => {
+              console.error('Error uploading profile image:', error);
+              // Show error message
+              this.showToastMessage('Failed to upload profile image. Please try again.', 'danger');
+            }
+          });
+      }
+      
+      /**
+       * Remove the current profile image
+       */
+      removeProfileImage() {
+        if (!this.currentUser || !this.currentUser.profileImage || this.isUploading) {
+          return;
+        }
+        
+        this.isUploading = true;
+        
+        this.userService.deleteProfileImage(this.currentUser.uid, this.currentUser.profileImage)
+          .pipe(finalize(() => {
+            this.isUploading = false;
+          }))
+          .subscribe({
+            next: (success) => {
+              if (success) {
+                // Update the local user object
+                if (this.currentUser) {
+                  this.currentUser = {
+                    ...this.currentUser,
+                    profileImage: null
+                  };
+                }
+                
+                // Show success message
+                this.showToastMessage('Profile image removed successfully', 'success');
+              } else {
+                // Show error message
+                this.showToastMessage('Failed to remove profile image. Please try again.', 'danger');
+              }
+            },
+            error: (error) => {
+              console.error('Error removing profile image:', error);
+              // Show error message
+              this.showToastMessage('Failed to remove profile image. Please try again.', 'danger');
+            }
+          });
+      }
+      
+      /**
+       * Validate if the file is an image with acceptable format and size
+       */
+      private isValidImageFile(file: File): boolean {
+        // Check file type
+        const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!acceptedImageTypes.includes(file.type)) {
+          this.showToastMessage('Invalid file type. Please select an image file (JPEG, PNG, GIF, WEBP).', 'danger');
+          return false;
+        }
+        
+        // Check file size (limit to 2MB)
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSizeInBytes) {
+          this.showToastMessage('Image too large. Please select an image smaller than 2MB.', 'danger');
+          return false;
+        }
+        
+        return true;
+      }
+      
+      /**
+       * Show a toast message
+       */
+       
+    private showToastMessage(message: string, color: string = 'success') {
+      this.toastMessage = message;
+      this.toastColor = color;
+      this.showToast = true;
+    }
 
   onSubmit() {
     if (this.profileForm.invalid || !this.currentUser) {

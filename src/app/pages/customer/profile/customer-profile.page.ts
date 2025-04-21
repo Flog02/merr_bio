@@ -313,17 +313,7 @@ import { finalize } from 'rxjs/operators';
       height: 48px;
       letter-spacing: 0.5px;
       
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
-        opacity: 0;
-        transition: var(--transition);
-      }
+      
       
       &:hover:not(:disabled)::before {
         opacity: 1;

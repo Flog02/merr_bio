@@ -395,6 +395,7 @@ export class ProductFormComponent implements OnInit {
     }
   }
   
+  
   /**
    * Mark an existing image for removal (will be removed on submit)
    */
@@ -405,7 +406,9 @@ export class ProductFormComponent implements OnInit {
       
       // Remove from existing images array
       this.existingImages.splice(index, 1);
+
     }
+    
   }
   
   /**
