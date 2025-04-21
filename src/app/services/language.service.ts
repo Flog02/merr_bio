@@ -9,6 +9,7 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
+      'MESSAGE_CLIENT':'Message Clieny',
       'VIEW':'VIEW',
       'PASSWORD_MIN_LENGTH':'Password too short',
       'EMAIL_INVALID':'Email Invalid',
@@ -172,6 +173,7 @@ export class LanguageService {
     },
     sq: {
       // Common
+      'MESSAGE_CLIENT':'Shkruaj Klientit',
       'purchase_request_message':'Mesazh per kërkese blerjeje',
       'purchase_request':'Kerko per te blere',
       'VIEW':'Shiko',

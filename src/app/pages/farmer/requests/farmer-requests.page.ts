@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {IonItemOption,IonItemOptions,IonItemSliding,IonBadge,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonList,IonToolbar}from '@ionic/angular/standalone'
+import {IonButton,IonItemOption,IonItemOptions,IonItemSliding,IonBadge,IonMenuButton,IonItem,IonLabel,IonHeader,IonTitle,IonButtons,IonIcon,IonContent,IonList,IonToolbar}from '@ionic/angular/standalone'
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -9,11 +9,11 @@ import { ProductService } from '../../../services/product.service';
 import { UserService } from '../../../services/user.service';
 import { AuthService } from '../../../services/auth.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-farmer-requests',
   standalone: true,
-  imports: [CommonModule,IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar, CommonModule, RouterModule, TranslatePipe],
+  imports: [IonButton,CommonModule,IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonMenuButton, IonItem, IonLabel, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonList, IonToolbar, CommonModule, RouterModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -37,7 +37,11 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <ion-badge slot="end" color="{{ getBadgeColor(request.status) }}">
           {{ getStatusText(request.status) | translate }}
         </ion-badge>
-      </ion-item>
+        <ion-button  fill="outline" (click)="startChat(request.customerId)">
+  <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+  {{ 'MESSAGE_CLIENT' | translate }}
+</ion-button>     
+ </ion-item>
 
       <ion-item-options side="end" *ngIf="request.status === 'pending'">
         <ion-item-option color="success" (click)="updateRequestStatus(request.id!, 'accepted')">
@@ -67,7 +71,9 @@ export class FarmerRequestsPage implements OnInit {
     private requestService: PurchaseRequestService,
     private productService: ProductService,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+
   ) {}
 
   ngOnInit() {
@@ -99,6 +105,10 @@ export class FarmerRequestsPage implements OnInit {
         });
       }
     });
+  }
+  startChat(customerId: string){
+    this.router.navigate([`/customer/chats/${customerId}`]);
+
   }
 
   getProductName(productId: string): string {
