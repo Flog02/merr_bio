@@ -88,6 +88,41 @@ export class FileUploadService {
       })
     )));
   }
+  
+  /**
+   * Upload a profile image for a user
+   * @param file The image file to upload
+   * @param userId The user's ID to use in the file path
+   * @returns Observable that emits the profile image URL
+   */
+  uploadProfileImage(file: File, userId: string): Observable<string> {
+    if (!file) {
+      return of('');
+    }
+    
+    // Use a standard naming convention for profile images
+    const fileExtension = file.name.split('.').pop();
+    const fileName = `profile_${new Date().getTime()}.${fileExtension}`;
+    const path = `profile-images/${userId}`;
+    
+    return this.uploadFile(file, path, fileName);
+  }
+  
+  /**
+   * Upload product images
+   * @param files Array of image files to upload
+   * @param productId The product ID
+   * @param farmerId The farmer's ID
+   * @returns Observable that emits an array of image URLs
+   */
+  uploadProductImages(files: File[], productId: string, farmerId: string): Observable<string[]> {
+    if (!files || files.length === 0) {
+      return of([]);
+    }
+    
+    const path = `product-images/${farmerId}/${productId}`;
+    return this.uploadMultipleFiles(files, path);
+  }
 
   /**
    * Delete a file from Firebase Storage by its URL

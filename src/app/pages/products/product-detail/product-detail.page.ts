@@ -62,9 +62,50 @@ import { Timestamp } from '@angular/fire/firestore';
 
 <ion-content>
   <div *ngIf="product">
-    <!-- Product Image -->
-    <div class="product-image">
-      <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+    <!-- Product Image Gallery -->
+    <div class="product-image-gallery">
+      <!-- When there are multiple images, show as gallery -->
+      <div *ngIf="product.images && product.images.length > 0" class="gallery-container">
+        <div class="main-image">
+          <img [src]="currentImageUrl" alt="{{ product.name }}">
+          
+          <!-- Navigation arrows (only if multiple images) -->
+          <div *ngIf="product.images.length > 1" class="gallery-navigation">
+            <button class="nav-button prev" (click)="prevImage()">
+              <ion-icon name="chevron-back"></ion-icon>
+            </button>
+            <button class="nav-button next" (click)="nextImage()">
+              <ion-icon name="chevron-forward"></ion-icon>
+            </button>
+          </div>
+          
+          <!-- Image indicator dots -->
+          <div *ngIf="product.images.length > 1" class="image-indicators">
+            <span 
+              *ngFor="let image of product.images; let i = index" 
+              class="indicator-dot"
+              [class.active]="i === currentImageIndex"
+              (click)="setCurrentImage(i)">
+            </span>
+          </div>
+        </div>
+        
+        <!-- Thumbnail strip (when more than 1 image) -->
+        <div *ngIf="product.images.length > 1" class="thumbnail-strip">
+          <div 
+            *ngFor="let image of product.images; let i = index" 
+            class="thumbnail"
+            [class.active]="i === currentImageIndex"
+            (click)="setCurrentImage(i)">
+            <img [src]="image" alt="Thumbnail">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fallback to placeholder if no images -->
+      <div *ngIf="!product.images || product.images.length === 0" class="product-image">
+        <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+      </div>
     </div>
     
     <!-- Product Info -->
@@ -72,21 +113,23 @@ import { Timestamp } from '@angular/fire/firestore';
       <h1 class="product-title">{{ product.name }}</h1>
       <div class="product-price">{{ product.price }} ALL<span class="unit">/{{ product.unit |uppercase|translate }}</span></div>
       
-      <div class="farmer-section" *ngIf="farmer"[routerLink]="['/farmers', farmer.uid]"  >
+      <div class="farmer-section" *ngIf="farmer" [routerLink]="['/farmers', farmer.uid]">
         <div class="farmer-avatar">
-          <img src="assets/farmer-placeholder.jpg" alt="{{ farmer.displayName }}">
+          <!-- Show farmer profile image if available -->
+          <img *ngIf="farmer.profileImage" [src]="farmer.profileImage" alt="{{ farmer.displayName }}">
+          <img *ngIf="!farmer.profileImage" src="assets/farmer-placeholder.jpg" alt="{{ farmer.displayName }}">
         </div>
         <div class="farmer-info">
           <div class="farmer-name">{{ farmer.displayName }}</div>
           <div class="farmer-location" *ngIf="farmer.location">{{ farmer.location }}</div>
         </div>
         <ion-icon name="chevron-forward-outline" class="view-profile-icon"></ion-icon>
-
       </div>
+      
       <ion-button expand="block" fill="outline" *ngIf="currentUser?.role === 'customer'" (click)="startChat()">
-  <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
-  {{ 'MESSAGE_FARMER' | translate }}
-</ion-button>
+        <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+        {{ 'MESSAGE_FARMER' | translate }}
+      </ion-button>
       
       <div class="product-details">
         <h3>{{ 'DESCRIPTION' | translate }}</h3>
@@ -100,7 +143,7 @@ import { Timestamp } from '@angular/fire/firestore';
           <div class="meta-item">
             <span class="label">{{ 'CATEGORY' | translate }}:</span>
             <span class="value">{{ product.category | uppercase | translate }}</span>
-            </div>
+          </div>
           <div class="meta-item" *ngIf="product.timestamp">
             <span class="label">{{ 'POSTED_ON' | translate }}:</span>
             <span class="value">{{ formatTimestamp(product.timestamp) }}</span>
@@ -130,24 +173,158 @@ import { Timestamp } from '@angular/fire/firestore';
   
   <!-- Action Button (Fixed at bottom) -->
   <div class="action-button" *ngIf="product && currentUser?.role === 'customer'">
-  <ion-button expand="block" (click)="requestToBuy(); ">
-    {{ 'ADD_TO_CART' | translate }} | {{ product.price * selectedQuantity }} ALL
-  </ion-button>
-</div>
+    <ion-button expand="block" (click)="requestToBuy()">
+      {{ 'ADD_TO_CART' | translate }} | {{ product.price * selectedQuantity }} ALL
+    </ion-button>
+  </div>
 
-<!-- Admin button  -->
-<div class="action-button" *ngIf="product && currentUser?.role === 'admin'">
-  <ion-button expand="block" (click)="editPost(product.id); ">
-    {{ 'Edit Post' | translate }}
-  </ion-button>
-</div>
-
-
+  <!-- Admin button  -->
+  <div class="action-button" *ngIf="product && currentUser?.role === 'admin'">
+    <ion-button expand="block" (click)="editPost(product.id)">
+      {{ 'Edit Post' | translate }}
+    </ion-button>
+  </div>
 </ion-content>
-
-<!-- <ion-footer *ngIf="product && currentUser?.role === 'customer'" class="ion-no-border"></ion-footer> -->
 `,
   styles: [`
+    .product-image-gallery {
+      width: 100%;
+      height: 320px;
+      position: relative;
+      overflow: hidden;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+      }
+      
+      .gallery-container {
+        width: 100%;
+        height: 100%;
+      }
+      
+      .main-image {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: var(--transition);
+        }
+        
+        .gallery-navigation {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 var(--spacing-md);
+          pointer-events: none;
+          
+          .nav-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: var(--transition);
+            
+            &:hover {
+              background: rgba(0, 0, 0, 0.7);
+            }
+            
+            ion-icon {
+              font-size: 20px;
+            }
+          }
+        }
+        
+        .image-indicators {
+          position: absolute;
+          bottom: var(--spacing-md);
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 8px;
+          z-index: 2;
+          
+          .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: var(--transition);
+            
+            &.active {
+              background: white;
+              transform: scale(1.2);
+            }
+          }
+        }
+      }
+      
+      .thumbnail-strip {
+        position: absolute;
+        bottom: var(--spacing-sm);
+        left: var(--spacing-md);
+        right: var(--spacing-md);
+        display: flex;
+        gap: 8px;
+        z-index: 2;
+        overflow-x: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        
+        &::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+        
+        .thumbnail {
+          width: 48px;
+          height: 48px;
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          border-radius: 4px;
+          overflow: hidden;
+          cursor: pointer;
+          flex-shrink: 0;
+          transition: var(--transition);
+          
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          
+          &.active {
+            border-color: white;
+            transform: scale(1.1);
+          }
+          
+          &:hover:not(.active) {
+            border-color: rgba(255, 255, 255, 0.8);
+          }
+        }
+      }
+    }
+    
     .product-image {
       width: 100%;
       height: 320px;
@@ -208,16 +385,6 @@ import { Timestamp } from '@angular/fire/firestore';
         color: var(--ion-color-medium);
         margin-left: 4px;
       }
-      
-      // &::after {
-      //   content: '';
-      //   display: block;
-      //   width: 40px;
-      //   height: 2px;
-      //   background-color: var(--ion-color-primary);
-      //   margin-left: var(--spacing-md);
-      //   opacity: 0.5;
-      // }
     }
     
     .farmer-section {
@@ -280,15 +447,8 @@ import { Timestamp } from '@angular/fire/firestore';
         }
       }
       
-      .rating {
-        display: flex;
-        align-items: center;
-        font-weight: 600;
-        color: var(--secondary-color, #d4af37);
-        
-        ion-icon {
-          margin-right: 4px;
-        }
+      .view-profile-icon {
+        color: var(--ion-color-medium);
       }
     }
     
@@ -394,8 +554,6 @@ import { Timestamp } from '@angular/fire/firestore';
       box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.08);
       z-index: 10;
       
-      
-      
       ion-button {
         margin: 0;
         --border-radius: var(--border-radius-md);
@@ -404,8 +562,6 @@ import { Timestamp } from '@angular/fire/firestore';
         font-family: 'Poppins', sans-serif;
         letter-spacing: 0.5px;
         text-transform: none;
-        
-        
         
         &::before {
           content: "";
@@ -478,6 +634,15 @@ export class ProductDetailPage implements OnInit {
   farmer: User | null = null;
   currentUser: User | null = null;
   
+  // Image gallery controls
+  currentImageIndex: number = 0;
+  get currentImageUrl(): string {
+    if (this.product?.images && this.product.images.length > 0) {
+      return this.product.images[this.currentImageIndex];
+    }
+    return 'assets/product-placeholder.jpg';
+  }
+  
   selectedQuantity: number = 1;
   quantityOptions: number[] = [1, 2, 3, 4, 5];
 
@@ -495,7 +660,7 @@ export class ProductDetailPage implements OnInit {
   ngOnInit() {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
-      console.log('Current User:', this.currentUser);  // Debugging line
+      console.log('Current User:', this.currentUser);
     });
     
     const productId = this.route.snapshot.paramMap.get('id');
@@ -503,7 +668,7 @@ export class ProductDetailPage implements OnInit {
       this.productService.getProductById(productId).subscribe({
         next: (product) => {
           this.product = product;
-          console.log('Product:', this.product);  // Debugging line
+          console.log('Product:', this.product);
           
           if (product.farmerId) {
             this.userService.getUserById(product.farmerId).subscribe({
@@ -522,6 +687,29 @@ export class ProductDetailPage implements OnInit {
           this.showErrorToast('Error loading product details.');
         }
       });
+    }
+  }
+  
+  // Image gallery navigation methods
+  nextImage() {
+    if (this.product?.images && this.currentImageIndex < this.product.images.length - 1) {
+      this.currentImageIndex++;
+    } else {
+      this.currentImageIndex = 0; // Loop back to the first image
+    }
+  }
+  
+  prevImage() {
+    if (this.product?.images && this.currentImageIndex > 0) {
+      this.currentImageIndex--;
+    } else if (this.product?.images) {
+      this.currentImageIndex = this.product.images.length - 1; // Loop to the last image
+    }
+  }
+  
+  setCurrentImage(index: number) {
+    if (this.product?.images && index >= 0 && index < this.product.images.length) {
+      this.currentImageIndex = index;
     }
   }
   
@@ -551,7 +739,7 @@ export class ProductDetailPage implements OnInit {
   }
 
   async requestToBuy() {
-    console.log('Request button clicked');  // Keep this debug line
+    console.log('Request button clicked');
     
     try {
       if (!this.currentUser) {
@@ -573,8 +761,8 @@ export class ProductDetailPage implements OnInit {
     }
   }
 
-  async editPost(productId:any){
-    console.log('Request button clicked');  // Keep this debug line
+  async editPost(productId: any) {
+    console.log('Edit button clicked');
     
     try {
       if (!this.currentUser) {
@@ -589,9 +777,9 @@ export class ProductDetailPage implements OnInit {
         return;
       }
       
-      await this.router.navigate(['/admin/products',productId]);
+      await this.router.navigate(['/admin/products', productId]);
     } catch (error) {
-      console.error('Error in requestToBuy:', error);
+      console.error('Error in editing post:', error);
       this.showErrorToast('An unexpected error occurred');
     }
   }

@@ -6,6 +6,6 @@ export interface User {
   role: 'customer' | 'farmer' | 'admin';
   location?: string;
   createdAt?: Date;
-  profileImage?: string; // URL to profile image
+  profileImage?: string | null; // Updated to allow null value
   // phoneVerified:any;
 }

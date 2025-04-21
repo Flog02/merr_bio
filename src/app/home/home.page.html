@@ -46,7 +46,10 @@
 
     <div class="product-slider">
       <ion-card style="cursor: pointer;" class="product-card" *ngFor="let product of (featuredProducts$ | async)?.slice(0,4)" [routerLink]="['/products', product.id]">
-        <img src="assets/product-placeholder.jpg" alt="{{ product.name || '' }}">
+        <!-- Show the first product image if available, otherwise use placeholder -->
+        <img *ngIf="product.images && product.images.length > 0" [src]="product.images[0]" alt="{{ product.name || '' }}">
+        <img *ngIf="!product.images || product.images.length === 0" src="assets/product-placeholder.jpg" alt="{{ product.name || '' }}">
+        
         <ion-card-content>
           <h3>{{ product.name }}</h3>
           <div class="price">{{ product.price || ''}} ALL <span class="unit">/ {{ product.unit || ''}}</span></div>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { 
   Firestore, 
   collection, 
@@ -14,25 +14,180 @@ import {
   getDocs,
   QuerySnapshot,
   DocumentSnapshot,
-  DocumentData
+  DocumentData,
+  serverTimestamp
 } from '@angular/fire/firestore';
-import { Observable, from, map, catchError, of, throwError, switchMap } from 'rxjs';
+import { Observable, from, map, catchError, of, throwError, switchMap, forkJoin } from 'rxjs';
 import { Product } from '../models/product.model';
+import { FileUploadService } from './file-upload.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  constructor(private firestore: Firestore) {}
+  private firestore = inject(Firestore);
+  private fileUploadService = inject(FileUploadService);
 
-  // Add a new product
-  addProduct(product: Omit<Product, 'id'>): Observable<string> {
+  /**
+   * Add a new product with optional images
+   * @param product Product data without ID
+   * @param imageFiles Optional array of image files
+   * @returns Observable<string> - The new product ID
+   */
+  addProduct(
+    product: Omit<Product, 'id'>, 
+    imageFiles?: File[]
+  ): Observable<string> {
     const productsRef = collection(this.firestore, 'products');
-    return from(addDoc(productsRef, product)).pipe(
-      map(docRef => docRef.id),
+    
+    // First add the product to get an ID
+    return from(addDoc(productsRef, {
+      ...product,
+      createdAt: serverTimestamp()
+    })).pipe(
+      switchMap(docRef => {
+        const productId = docRef.id;
+        
+        // If there are images, upload them
+        if (imageFiles && imageFiles.length > 0) {
+          return this.fileUploadService.uploadProductImages(
+            imageFiles, 
+            productId, 
+            product.farmerId
+          ).pipe(
+            switchMap(imageUrls => {
+              // Update the product with image URLs
+              return from(updateDoc(docRef, { images: imageUrls })).pipe(
+                map(() => productId)
+              );
+            })
+          );
+        }
+        
+        // If no images, just return the product ID
+        return of(productId);
+      }),
       catchError(error => {
         console.error('Error adding product:', error);
         return throwError(() => new Error('Failed to add product'));
+      })
+    );
+  }
+
+  /**
+   * Update product with optional new images
+   * @param id Product ID
+   * @param data Partial product data
+   * @param imageFiles Optional new image files
+   * @param replaceImages Whether to replace existing images (true) or append (false)
+   * @returns Observable<void>
+   */
+  updateProduct(
+    id: string, 
+    data: Partial<Product>,
+    imageFiles?: File[],
+    replaceImages: boolean = false
+  ): Observable<void> {
+    if (!id) {
+      return throwError(() => new Error('Invalid product ID'));
+    }
+    
+    const productRef = doc(this.firestore, 'products', id);
+    
+    // If there are image files to upload
+    if (imageFiles && imageFiles.length > 0) {
+      return from(getDoc(productRef)).pipe(
+        switchMap(docSnap => {
+          if (!docSnap.exists()) {
+            throw new Error('Product not found');
+          }
+          
+          const product = { id: docSnap.id, ...docSnap.data() } as Product;
+          
+          // Upload the new images
+          return this.fileUploadService.uploadProductImages(
+            imageFiles, 
+            id, 
+            product.farmerId
+          ).pipe(
+            switchMap(newImageUrls => {
+              // Determine the final image URLs array
+              let finalImages: string[] = [];
+              
+              if (replaceImages) {
+                // Replace existing images with new ones
+                finalImages = newImageUrls;
+              } else {
+                // Append new images to existing ones
+                const existingImages = product.images || [];
+                finalImages = [...existingImages, ...newImageUrls];
+              }
+              
+              // Update the product with all changes
+              return from(updateDoc(productRef, { 
+                ...data,
+                images: finalImages
+              }));
+            })
+          );
+        }),
+        catchError(error => {
+          console.error(`Error updating product ${id}:`, error);
+          return throwError(() => new Error('Failed to update product'));
+        })
+      );
+    }
+    
+    // If no new images, just update the product data
+    return from(updateDoc(productRef, data)).pipe(
+      catchError(error => {
+        console.error(`Error updating product ${id}:`, error);
+        return throwError(() => new Error('Failed to update product'));
+      })
+    );
+  }
+
+  /**
+   * Delete a product and its images from storage
+   * @param id Product ID
+   * @returns Observable<void>
+   */
+  deleteProduct(id: string): Observable<void> {
+    if (!id) {
+      return throwError(() => new Error('Invalid product ID'));
+    }
+    
+    const productRef = doc(this.firestore, 'products', id);
+    
+    // First get the product to have access to image URLs
+    return from(getDoc(productRef)).pipe(
+      switchMap(docSnap => {
+        if (!docSnap.exists()) {
+          throw new Error('Product not found');
+        }
+        
+        const product = { id: docSnap.id, ...docSnap.data() } as Product;
+        const imageUrls = product.images || [];
+        
+        // Create array of observables for deleting each image
+        const deleteImageTasks = imageUrls.map(url => 
+          this.fileUploadService.deleteFile(url)
+        );
+        
+        // If there are images to delete
+        if (deleteImageTasks.length > 0) {
+          // Delete images first, then delete the product
+          return forkJoin(deleteImageTasks).pipe(
+            switchMap(() => from(deleteDoc(productRef)))
+          );
+        }
+        
+        // If no images, just delete the product
+        return from(deleteDoc(productRef));
+      }),
+      catchError(error => {
+        console.error(`Error deleting product ${id}:`, error);
+        return throwError(() => new Error('Failed to delete product'));
       })
     );
   }
@@ -123,22 +278,6 @@ export class ProductService {
       })
     );
   }
-  
-
-  // Update product
-  updateProduct(id: string, data: Partial<Product>): Observable<void> {
-    if (!id) {
-      return throwError(() => new Error('Invalid product ID'));
-    }
-    
-    const productRef = doc(this.firestore, 'products', id);
-    return from(updateDoc(productRef, data)).pipe(
-      catchError(error => {
-        console.error(`Error updating product ${id}:`, error);
-        return throwError(() => new Error('Failed to update product'));
-      })
-    );
-  }
 
   // Approve product
   approveProduct(id: string): Observable<void> {
@@ -155,58 +294,67 @@ export class ProductService {
     );
   }
 
-  // Delete product
-  deleteProduct(id: string): Observable<void> {
-    if (!id) {
-      return throwError(() => new Error('Invalid product ID'));
+  /**
+   * Delete all products for a given farmer, including their images
+   * @param farmerId Farmer ID
+   * @returns Observable<void>
+   */
+  deleteProductsByFarmer(farmerId: string): Observable<void> {
+    if (!farmerId) {
+      console.error('Invalid farmerId provided for product deletion');
+      return throwError(() => new Error('Invalid farmer ID'));
     }
     
-    const productRef = doc(this.firestore, 'products', id);
-    return from(deleteDoc(productRef)).pipe(
+    const productsRef = collection(this.firestore, 'products');
+    const q = query(productsRef, where('farmerId', '==', farmerId));
+    
+    return from(getDocs(q)).pipe(
+      switchMap((querySnapshot: QuerySnapshot<DocumentData>) => {
+        // If no products found, return completed Observable
+        if (querySnapshot.empty) {
+          console.log(`No products found for farmer ${farmerId}`);
+          return of(undefined);
+        }
+        
+        // Convert the docs array to an Observable
+        const docs = querySnapshot.docs;
+        
+        // Process each product sequentially (delete images, then delete product)
+        return docs.reduce(
+          (acc$: Observable<unknown>, docSnapshot) => 
+            acc$.pipe(
+              switchMap(() => {
+                const productId = docSnapshot.id;
+                const product = { id: productId, ...docSnapshot.data() } as Product;
+                console.log(`Deleting product: ${productId}`);
+                
+                // If product has images, delete them first
+                if (product.images && product.images.length > 0) {
+                  const deleteImageTasks = product.images.map(url => 
+                    this.fileUploadService.deleteFile(url)
+                  );
+                  
+                  return forkJoin(deleteImageTasks).pipe(
+                    switchMap(() => from(deleteDoc(doc(this.firestore, 'products', productId)))),
+                    catchError(error => {
+                      console.error(`Error deleting images for product ${productId}:`, error);
+                      // Even if images deletion fails, try to delete the product document
+                      return from(deleteDoc(doc(this.firestore, 'products', productId)));
+                    })
+                  );
+                } else {
+                  // If no images, just delete the product
+                  return from(deleteDoc(doc(this.firestore, 'products', productId)));
+                }
+              })
+            ),
+          of(undefined) // Start with an empty Observable
+        ) as Observable<void>;
+      }),
       catchError(error => {
-        console.error(`Error deleting product ${id}:`, error);
-        return throwError(() => new Error('Failed to delete product'));
+        console.error(`Error deleting products for farmer ${farmerId}:`, error);
+        return throwError(() => new Error(`Failed to delete farmer products: ${error.message}`));
       })
     );
   }
-  
-  // Fixed version with proper TypeScript typing
-deleteProductsByFarmer(farmerId: string): Observable<void> {
-  if (!farmerId) {
-    console.error('Invalid farmerId provided for product deletion');
-    return throwError(() => new Error('Invalid farmer ID'));
-  }
-  
-  const productsRef = collection(this.firestore, 'products');
-  const q = query(productsRef, where('farmerId', '==', farmerId));
-  
-  return from(getDocs(q)).pipe(
-    switchMap((querySnapshot: QuerySnapshot<DocumentData>) => {
-      // If no products found, return completed Observable
-      if (querySnapshot.empty) {
-        console.log(`No products found for farmer ${farmerId}`);
-        return of(undefined);
-      }
-      
-      // Convert the docs array to an Observable
-      const docs = querySnapshot.docs;
-      
-      // Create an Observable chain that processes each deletion sequentially
-      return docs.reduce(
-        (acc$: Observable<unknown>, docSnapshot) => 
-          acc$.pipe(
-            switchMap(() => {
-              console.log(`Deleting product: ${docSnapshot.id}`);
-              return from(deleteDoc(doc(this.firestore, 'products', docSnapshot.id)));
-            })
-          ),
-        of(undefined) // Start with an empty Observable
-      ) as Observable<void>;
-    }),
-    catchError(error => {
-      console.error(`Error deleting products for farmer ${farmerId}:`, error);
-      return throwError(() => new Error(`Failed to delete farmer products: ${error.message}`));
-    })
-  );
-}
 }
