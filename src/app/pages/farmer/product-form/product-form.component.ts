@@ -13,7 +13,7 @@ import { TranslatePipe } from "../../../pipes/translate.pipe";
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [IonTextarea, IonSelect, IonSelectModal, IonInput, IonNote, IonBackButton, IonItem, IonLabel, IonSelectOption, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonTextarea, IonSelect, IonInput, IonNote, IonBackButton, IonItem, IonLabel, IonSelectOption, IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
