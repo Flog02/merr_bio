@@ -8,4 +8,8 @@ export interface User {
   createdAt?: Date;
   profileImage?: string | null; // Updated to allow null value
   // phoneVerified:any;
+  emailVerified?: boolean;
+  emailVerificationRequired?: boolean;
+  status?: 'pending' | 'active' | 'suspended';
+  updatedAt?: any; // This will hold the Firestore timestamp
 }

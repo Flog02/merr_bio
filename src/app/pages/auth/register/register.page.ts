@@ -112,7 +112,13 @@ import { finalize } from 'rxjs';
           </ion-item>
         </ion-radio-group>
 
-        <ion-button expand="block" type="submit" [disabled]="!registerForm.valid || isUploading" class="ion-margin-top">
+        <!-- Security notice -->
+        <div class="security-notice">
+          <ion-icon name="shield-checkmark"></ion-icon>
+          <p>{{ 'EMAIL_VERIFICATION_REQUIRED' | translate }}</p>
+        </div>
+
+        <ion-button expand="block" type="submit" [disabled]="!registerForm.valid || isUploading || isSubmitting" class="ion-margin-top">
           <ion-spinner *ngIf="isSubmitting" name="circles" class="submit-spinner"></ion-spinner>
           <span *ngIf="!isSubmitting">{{ 'REGISTER' | translate }}</span>
         </ion-button>
@@ -224,6 +230,27 @@ import { finalize } from 'rxjs';
     .submit-spinner {
       margin-right: 8px;
     }
+    
+    .security-notice {
+      display: flex;
+      align-items: center;
+      background-color: rgba(var(--ion-color-success-rgb), 0.1);
+      padding: 10px;
+      border-radius: 8px;
+      margin: 20px 0;
+      
+      ion-icon {
+        font-size: 24px;
+        color: var(--ion-color-success);
+        margin-right: 10px;
+      }
+      
+      p {
+        font-size: 14px;
+        color: var(--ion-color-dark);
+        margin: 0;
+      }
+    }
   `
 })
 export class RegisterPage {
@@ -248,7 +275,7 @@ export class RegisterPage {
   ) {
     this.registerForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],  // Increased minimum password length
       displayName: ['', [Validators.required]],
       phoneNumber: [''],
       location: [''],
@@ -291,7 +318,7 @@ export class RegisterPage {
       return false;
     }
     
-    // Check file size (limit to 2MB)
+    // Check file size (limit to 5MB)
     const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSizeInBytes) {
       this.presentToast('Image too large. Please select an image smaller than 5MB.', 'danger');
@@ -342,13 +369,21 @@ export class RegisterPage {
     }
 
     this.isSubmitting = true;
-    const { email, password, displayName, phoneNumber, location, role } = this.registerForm.value;
-
+    
     try {
-      // First register the user (creates auth account)
-      const userCredential = await this.authService.register(email, password, role, displayName, phoneNumber, location);
+      const { email, password, displayName, phoneNumber, location, role } = this.registerForm.value;
       
-      // If there's a profile image selected, upload it
+      // First register the user (creates auth account and sends verification email)
+      const userCredential = await this.authService.register(
+        email, 
+        password, 
+        role, 
+        displayName, 
+        phoneNumber, 
+        location
+      );
+      
+      // Handle profile image upload if one was selected
       if (this.selectedImage && userCredential.user) {
         this.isUploading = true;
         
@@ -367,36 +402,41 @@ export class RegisterPage {
                 profileImage: downloadUrl
               }).subscribe({
                 next: () => {
-                  this.presentToast('Registration successful with profile image', 'success');
-                  this.router.navigate(['/']);
+                  // Show success message and redirect to email verification page
+                  this.presentToast('Registration successful! Please verify your email.', 'success');
+                  this.router.navigate(['/verify-email']);
                 },
                 error: (error) => {
                   console.error('Error updating profile with image:', error);
-                  // Still navigate home as the account was created
-                  this.router.navigate(['/']);
+                  // Still redirect to verification page as the account was created
+                  this.router.navigate(['/verify-email']);
                 }
               });
             },
             error: (error) => {
               console.error('Error uploading profile image:', error);
-              // Still navigate home as the account was created
-              this.presentToast('Registration successful but image upload failed', 'warning');
-              this.router.navigate(['/']);
+              // Still redirect to verification page as the account was created
+              this.presentToast('Registration successful but image upload failed. Please verify your email.', 'warning');
+              this.router.navigate(['/verify-email']);
             }
           });
       } else {
-        // No image to upload, just complete registration
+        // No image to upload, just complete registration and redirect to verification
         this.isSubmitting = false;
-        this.presentToast('Registration successful', 'success');
-        this.router.navigate(['/']);
+        this.presentToast('Registration successful! Please verify your email.', 'success');
+        this.router.navigate(['/verify-email']);
       }
     } catch (error: any) {
       this.isSubmitting = false;
       console.error('Registration error', error);
       
-      // Check for specific Firebase error codes
+      // Handle specific Firebase error codes
       if (error.code === 'auth/email-already-in-use') {
         this.presentAlert('Email Already Exists', 'This email address is already registered. Please try a different one.');
+      } else if (error.code === 'auth/weak-password') {
+        this.presentAlert('Weak Password', 'Please choose a stronger password (at least 8 characters with a mix of letters, numbers, and symbols).');
+      } else if (error.code === 'auth/invalid-email') {
+        this.presentAlert('Invalid Email', 'Please provide a valid email address.');
       } else {
         // Generic error handling for other errors
         this.presentAlert('Registration Error', error.message || 'An error occurred during registration. Please try again.');
@@ -407,7 +447,7 @@ export class RegisterPage {
   async presentToast(message: string, color: string = 'success') {
     const toast = await this.toastController.create({
       message,
-      duration: 2000,
+      duration: 3000,
       color,
       position: 'bottom'
     });
