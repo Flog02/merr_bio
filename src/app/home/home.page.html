@@ -25,7 +25,7 @@
 
   <div>
 
-    <div class="adminsupport" *ngIf="currentUser?.role!=='admin'">
+    <div class="adminsupport" *ngIf="currentUser?.role=='farmer'|| currentUser?.role=='customer'">
       <ion-button (click)="chatAdmin()">
         <ion-icon name="help-circle-outline"></ion-icon>
 
