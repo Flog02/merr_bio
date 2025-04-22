@@ -526,10 +526,10 @@ export class AdminProfilePage implements OnInit {
           return false;
         }
         
-        // Check file size (limit to 2MB)
-        const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+        // Check file size (limit to 5MB)
+        const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSizeInBytes) {
-          this.showToastMessage('Image too large. Please select an image smaller than 2MB.', 'danger');
+          this.showToastMessage('Image too large. Please select an image smaller than 5MB.', 'danger');
           return false;
         }
         
