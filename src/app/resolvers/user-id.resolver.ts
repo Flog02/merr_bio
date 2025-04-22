@@ -1,15 +1,19 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, ResolveFn, Router } from '@angular/router';
-import { EMPTY, Observable, catchError, map, of } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { UserService } from '../services/user.service';
 
 export const userIdResolver: ResolveFn<boolean> = (route: ActivatedRouteSnapshot) => {
-  const userId = route.paramMap.get('userId');
+  // Check if we're resolving a userId or an id parameter
+  const paramName = route.routeConfig?.path?.includes('chats') ? 'userId' : 'id';
+  const userId = route.paramMap.get(paramName);
   const userService = inject(UserService);
   const router = inject(Router);
   
   if (!userId) {
-    router.navigate(['/chats']);
+    // Determine where to redirect based on the route
+    const redirectPath = paramName === 'userId' ? '/chats' : '/home';
+    router.navigate([redirectPath]);
     return of(false);
   }
   
@@ -18,12 +22,16 @@ export const userIdResolver: ResolveFn<boolean> = (route: ActivatedRouteSnapshot
       if (user) {
         return true;
       } else {
-        router.navigate(['/chats']);
+        // Redirect based on the route type
+        const redirectPath = paramName === 'userId' ? '/chats' : '/home';
+        router.navigate([redirectPath]);
         return false;
       }
     }),
     catchError(() => {
-      router.navigate(['/chats']);
+      // Redirect based on the route type
+      const redirectPath = paramName === 'userId' ? '/chats' : '/home';
+      router.navigate([redirectPath]);
       return of(false);
     })
   );
