@@ -56,6 +56,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       <div class="ion-text-center ion-padding-top">
         <p>{{"Don't have an account?"|translate}} <a routerLink="/register">Register</a></p>
       </div>
+      <ion-button fill="clear" routerLink="/forgot-password">
+  {{ 'FORGOT_PASSWORD' | translate }}
+</ion-button>
     </ion-content>
   `,
   styles: `

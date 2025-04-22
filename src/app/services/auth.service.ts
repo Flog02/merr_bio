@@ -5,10 +5,8 @@ import {
   signInWithEmailAndPassword, 
   signOut, 
   user, 
-  UserCredential, 
-  sendEmailVerification,
-  applyActionCode,
-  checkActionCode
+  UserCredential,
+  sendPasswordResetEmail
 } from '@angular/fire/auth';
 import { 
   Firestore, 
@@ -21,11 +19,14 @@ import {
   query,
   where,
   getDocs,
-  serverTimestamp
+  serverTimestamp,
+  addDoc,
+  DocumentReference
 } from '@angular/fire/firestore';
-import { Observable, from, map, of, switchMap, tap, catchError } from 'rxjs';
+import { Observable, from, map, of, switchMap, tap, catchError, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -41,21 +42,7 @@ export class AuthService {
     this.user$ = user(this.auth).pipe(
       switchMap(firebaseUser => {
         if (firebaseUser) {
-          // Check if email is verified when required
-          if (firebaseUser.emailVerified) {
-            return this.getUserData(firebaseUser.uid);
-          } else {
-            // Check if the user is in the verification process
-            return this.getUserData(firebaseUser.uid).pipe(
-              map(userData => {
-                if (userData && userData.emailVerificationRequired && !userData.emailVerified) {
-                  // User exists but needs to verify email
-                  return {...userData, pendingEmailVerification: true};
-                }
-                return userData;
-              })
-            );
-          }
+          return this.getUserData(firebaseUser.uid);
         } else {
           return of(null);
         }
@@ -64,172 +51,148 @@ export class AuthService {
   }
 
   /**
-   * Step 1 of registration - Create user account and send verification email
+   * Generate a random 6-digit verification code
    */
-  async register(
+  private generateVerificationCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  private sendVerificationEmail(email: string, code: string): Observable<boolean> {
+    // The email will be sent by the Cloud Function when the document is created
+    // We just need to return success here
+    console.log(`Verification code generated for ${email}. Email will be sent by Cloud Function.`);
+    return of(true);
+  }
+
+  /**
+   * Initiate registration by sending verification code
+   * Step 1 of the registration process
+   */
+  initiateRegistration(email: string, userData: any): Observable<string> {
+    // Generate verification code
+    const verificationCode = this.generateVerificationCode();
+    
+    // Store pending registration in Firestore
+    const pendingRegistrationsRef = collection(this.firestore, 'pendingRegistrations');
+    
+    // Set expiration time (1 hour from now)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+    
+    // Create pending registration record
+    return from(addDoc(pendingRegistrationsRef, {
+      email,
+      verificationCode,
+      userData,
+      expiresAt,
+      createdAt: serverTimestamp(),
+      attempts: 0
+    })).pipe(
+      switchMap((docRef: DocumentReference) => {
+        // Send verification email with code
+        return this.sendVerificationEmail(email, verificationCode).pipe(
+          map(() => docRef.id) // Return the document ID for future reference
+        );
+      }),
+      catchError(error => {
+        console.error('Error initiating registration:', error);
+        return throwError(() => new Error('Failed to initiate registration'));
+      })
+    );
+  }
+
+  /**
+   * Complete registration with verification code
+   * Step 2 of the registration process
+   */
+  completeRegistration(
+    pendingId: string, 
     email: string, 
     password: string, 
-    role: 'customer' | 'farmer' | 'admin', 
-    displayName: string, 
-    phoneNumber?: string, 
-    location?: string
-  ): Promise<UserCredential> {
-    try {
-      // Create the Firebase Auth account
-      const credential = await createUserWithEmailAndPassword(this.auth, email, password);
-      
-      // Send verification email
-      await sendEmailVerification(credential.user);
-      
-      // Create user document with verified=false
-      const user: User = {
-        uid: credential.user.uid,
-        email,
-        displayName,
-        phoneNumber: phoneNumber || '',
-        location: location || '',
-        role,
-        createdAt: new Date(),
-        emailVerified: false,
-        emailVerificationRequired: true,
-        status: 'pending' // Account status until verified
-      };
-      
-      // Save to Firestore
-      await setDoc(doc(this.firestore, 'users', credential.user.uid), user);
-      
-      // After registration, direct to verification page
-      this.router.navigate(['/verify-email']);
-      
-      return credential;
-    } catch (error) {
-      console.error('Registration error:', error);
-      
-      // If there's an error after creating the user, try to clean up
-      try {
-        // If the user was created in Auth but the document creation failed
-        if (this.auth.currentUser) {
-          await this.auth.currentUser.delete();
+    verificationCode: string
+  ): Observable<UserCredential> {
+    const pendingRef = doc(this.firestore, 'pendingRegistrations', pendingId);
+    
+    return from(getDoc(pendingRef)).pipe(
+      switchMap(docSnap => {
+        if (!docSnap.exists()) {
+          return throwError(() => new Error('Registration request not found or expired'));
         }
-      } catch (deleteError) {
-        console.error('Error cleaning up after failed registration:', deleteError);
-      }
-      
-      throw error;
-    }
-  }
-
-  /**
-   * Verify email using action code from email link
-   */
-  verifyEmail(actionCode: string): Observable<boolean> {
-    return from(applyActionCode(this.auth, actionCode)).pipe(
-      switchMap(() => {
-        // After verification with Firebase Auth, update our Firestore record
-        if (this.auth.currentUser) {
-          const userRef = doc(this.firestore, 'users', this.auth.currentUser.uid);
-          return from(updateDoc(userRef, { 
-            emailVerified: true,
-            status: 'active',
-            updatedAt: serverTimestamp()
-          })).pipe(
-            map(() => true),
-            catchError(error => {
-              console.error('Error updating verification status:', error);
-              return of(false);
-            })
-          );
+        
+        const data = docSnap.data();
+        
+        // Check if code has expired
+        const expiresAt = data['expiresAt'].toDate();
+        if (new Date() > expiresAt) {
+          return throwError(() => new Error('Verification code has expired'));
         }
-        return of(false);
+        
+        // Check if too many attempts
+        const attempts = data['attempts'] || 0;
+        if (attempts >= 5) {
+          return throwError(() => new Error('Too many failed attempts. Please request a new code.'));
+        }
+        
+        // Verify the code
+        if (data['verificationCode'] !== verificationCode) {
+          // Increment attempts counter
+          from(updateDoc(pendingRef, { attempts: attempts + 1 })).subscribe();
+          return throwError(() => new Error('Invalid verification code'));
+        }
+        
+        // Verification successful, create the user account
+        return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
+          switchMap(credential => {
+            const userData = data['userData'];
+            
+            // Create the user document in Firestore
+            const user: User = {
+              uid: credential.user.uid,
+              email,
+              displayName: userData.displayName,
+              phoneNumber: userData.phoneNumber || '',
+              location: userData.location || '',
+              role: userData.role,
+              createdAt: new Date(),
+              status: 'active'
+            };
+            
+            // Save user to Firestore
+            return from(setDoc(doc(this.firestore, 'users', credential.user.uid), user)).pipe(
+              switchMap(() => {
+                // Delete the pending registration
+                return from(deleteDoc(pendingRef)).pipe(
+                  map(() => credential)
+                );
+              })
+            );
+          })
+        );
       }),
       catchError(error => {
-        console.error('Error verifying email:', error);
-        return of(false);
+        console.error('Error completing registration:', error);
+        return throwError(() => error);
       })
-    );
-  }
-
-  /**
-   * Resend verification email to current user
-   */
-  resendVerificationEmail(): Observable<boolean> {
-    if (!this.auth.currentUser) {
-      return of(false);
-    }
-    
-    return from(sendEmailVerification(this.auth.currentUser)).pipe(
-      map(() => true),
-      catchError(error => {
-        console.error('Error sending verification email:', error);
-        return of(false);
-      })
-    );
-  }
-
-  /**
-   * Check if the current user's email is verified
-   */
-  checkEmailVerified(): Observable<boolean> {
-    if (!this.auth.currentUser) {
-      return of(false);
-    }
-    
-    // Reload the user to get fresh verification status
-    return from(this.auth.currentUser.reload()).pipe(
-      map(() => {
-        return this.auth.currentUser?.emailVerified || false;
-      }),
-      catchError(() => of(false))
     );
   }
 
   /**
    * Login with email and password
    */
- /**
- * Login with email and password
- */
-login(email: string, password: string): Observable<any> {
-  return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
-    switchMap(userCredential => { // Change 'credential' to 'userCredential'
-      // Now use userCredential throughout this method
-      return this.getUserData(userCredential.user.uid).pipe(
-        switchMap(user => {
-          if (user) {
-            // Check if email verification is required but not completed
-            if (user.emailVerificationRequired && !user.emailVerified) {
-              if (!userCredential.user.emailVerified) { // Use userCredential here
-                // Email verification is pending
-                this.router.navigate(['/verify-email']);
-                return of({...user, pendingEmailVerification: true});
-              } else {
-                // Firebase Auth shows verified, but our DB doesn't - update it
-                const userRef = doc(this.firestore, 'users', user.uid);
-                return from(updateDoc(userRef, { 
-                  emailVerified: true,
-                  status: 'active',
-                  updatedAt: serverTimestamp()
-                })).pipe(
-                  map(() => ({...user, emailVerified: true}))
-                );
-              }
-            } else {
-              // User is verified or verification not required
-              this.navigateByRole(user.role);
-              return of(user);
-            }
-          } else {
-            throw new Error('User data not found');
-          }
-        })
-      );
-    }),
-    catchError(error => {
-      console.error('Login error:', error);
-      throw error;
-    })
-  );
-}
+  login(email: string, password: string): Observable<User> {
+    return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
+      switchMap(userCredential => this.getUserData(userCredential.user.uid)),
+      tap(user => {
+        if (user) {
+          this.navigateByRole(user.role);
+        }
+      }),
+      catchError(error => {
+        console.error('Login error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 
   /**
    * Logout current user
@@ -239,6 +202,96 @@ login(email: string, password: string): Observable<any> {
       tap(() => {
         // Navigate to home after logout
         this.router.navigate(['/']);
+      })
+    );
+  }
+
+  /**
+   * Initiate password reset by sending verification code
+   */
+  initiatePasswordReset(email: string): Observable<string> {
+    // Generate verification code
+    const verificationCode = this.generateVerificationCode();
+    
+    // Store reset request in Firestore
+    const resetRequestsRef = collection(this.firestore, 'passwordResetRequests');
+    
+    // Set expiration time (1 hour from now)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+    
+    // Create reset request record
+    return from(addDoc(resetRequestsRef, {
+      email,
+      verificationCode,
+      expiresAt,
+      createdAt: serverTimestamp(),
+      attempts: 0
+    })).pipe(
+      switchMap((docRef: DocumentReference) => {
+        // Send verification email with code
+        return this.sendVerificationEmail(email, verificationCode).pipe(
+          map(() => docRef.id) // Return the document ID for future reference
+        );
+      }),
+      catchError(error => {
+        console.error('Error initiating password reset:', error);
+        return throwError(() => new Error('Failed to initiate password reset'));
+      })
+    );
+  }
+
+  /**
+   * Complete password reset with verification code
+   */
+  completePasswordReset(
+    resetId: string,
+    email: string,
+    newPassword: string,
+    verificationCode: string
+  ): Observable<boolean> {
+    const resetRef = doc(this.firestore, 'passwordResetRequests', resetId);
+    
+    return from(getDoc(resetRef)).pipe(
+      switchMap(docSnap => {
+        if (!docSnap.exists()) {
+          return throwError(() => new Error('Reset request not found or expired'));
+        }
+        
+        const data = docSnap.data();
+        
+        // Check if code has expired
+        const expiresAt = data['expiresAt'].toDate();
+        if (new Date() > expiresAt) {
+          return throwError(() => new Error('Verification code has expired'));
+        }
+        
+        // Check if too many attempts
+        const attempts = data['attempts'] || 0;
+        if (attempts >= 5) {
+          return throwError(() => new Error('Too many failed attempts. Please request a new code.'));
+        }
+        
+        // Verify the code
+        if (data['verificationCode'] !== verificationCode) {
+          // Increment attempts counter
+          from(updateDoc(resetRef, { attempts: attempts + 1 })).subscribe();
+          return throwError(() => new Error('Invalid verification code'));
+        }
+        
+        // Verification successful, reset the password
+        return from(sendPasswordResetEmail(this.auth, email)).pipe(
+          switchMap(() => {
+            // Delete the reset request
+            return from(deleteDoc(resetRef)).pipe(
+              map(() => true)
+            );
+          })
+        );
+      }),
+      catchError(error => {
+        console.error('Error completing password reset:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -279,26 +332,42 @@ login(email: string, password: string): Observable<any> {
   }
 
   /**
-   * Clean up unverified accounts (could be run on a schedule)
-   * This helps prevent accumulation of unverified accounts
+   * Clean up expired verification codes and password reset requests
+   * This could be run periodically by your application
    */
-  cleanupUnverifiedAccounts(olderThanDays: number = 7): Observable<number> {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+  cleanupExpiredRequests(): Observable<number> {
+    const now = new Date();
     
-    const usersRef = collection(this.firestore, 'users');
-    const q = query(
-      usersRef, 
-      where('emailVerified', '==', false),
-      where('status', '==', 'pending'),
-      where('createdAt', '<', cutoffDate)
+    // Clean up pending registrations
+    const pendingQuery = query(
+      collection(this.firestore, 'pendingRegistrations'),
+      where('expiresAt', '<', now)
     );
     
-    return from(getDocs(q)).pipe(
-      switchMap(snapshot => {
-        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    // Clean up password reset requests
+    const resetQuery = query(
+      collection(this.firestore, 'passwordResetRequests'),
+      where('expiresAt', '<', now)
+    );
+    
+    // Execute both cleanup operations
+    return from(Promise.all([getDocs(pendingQuery), getDocs(resetQuery)])).pipe(
+      switchMap(([pendingSnapshot, resetSnapshot]) => {
+        const deletePromises: Promise<void>[] = [];
+        
+        // Delete expired pending registrations
+        pendingSnapshot.docs.forEach(doc => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        
+        // Delete expired password reset requests
+        resetSnapshot.docs.forEach(doc => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        
+        // Execute all deletions
         return from(Promise.all(deletePromises)).pipe(
-          map(() => snapshot.size)
+          map(() => deletePromises.length)
         );
       })
     );

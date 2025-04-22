@@ -1,1 +1,5 @@
-{}
+{
+  "projects": {
+    "default": "merr-bio-85fe1"
+  }
+}

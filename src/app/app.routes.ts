@@ -25,6 +25,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/auth/register/register.page').then(m => m.RegisterPage)
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
+  {
     path: 'farmers/:id',
     resolve: { valid: userIdResolver },
     loadComponent: () => import('./pages/farmer-profile/farmer-profile.component')
