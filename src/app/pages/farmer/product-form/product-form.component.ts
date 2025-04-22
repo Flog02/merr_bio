@@ -436,28 +436,49 @@ export class ProductFormComponent implements OnInit {
     if (this.productForm.invalid || !this.farmerId) {
       return;
     }
-
+  
     this.isUploading = true;
     
+    // Create product data with the current list of existing images
     const productData: Partial<Product> = {
       ...this.productForm.value,
-      farmerId: this.farmerId
+      farmerId: this.farmerId,
+      images: this.existingImages // Include the current state of existingImages
     };
-
-    // Handle existing images to be removed
-    const deleteImageTasks = this.imagesToRemove.map(imageUrl => 
-      this.fileUploadService.deleteFile(imageUrl)
-    );
-
-    // Create a function to process form submission after handling images
+  
+    // Handle image deletion first
+    const deleteImageTasks = this.imagesToRemove.map(imageUrl => {
+      return new Promise<boolean>(resolve => {
+        // Skip invalid URLs
+        if (!imageUrl || typeof imageUrl !== 'string' || imageUrl.trim() === '') {
+          console.log('Skipping invalid image URL');
+          resolve(true);
+          return;
+        }
+        
+        this.fileUploadService.deleteFile(imageUrl).subscribe({
+          next: () => {
+            console.log('Successfully deleted image:', imageUrl);
+            resolve(true);
+          },
+          error: (err) => {
+            console.error('Error deleting image:', err);
+            // Don't fail the whole operation if one image fails
+            resolve(false);
+          }
+        });
+      });
+    });
+  
+    // Process the form submission after handling image deletions
     const processSubmission = () => {
       if (this.isEditMode) {
         // Update existing product
         this.productService.updateProduct(
           this.productId, 
-          productData, 
+          productData,
           this.selectedImages,
-          this.existingImages.length === 0 // Replace images only if all existing ones were removed
+          false // Don't replace images - the service will use productData.images
         ).subscribe({
           next: () => {
             this.isUploading = false;
@@ -476,7 +497,7 @@ export class ProductFormComponent implements OnInit {
           createdAt: new Date(),
           approved: false
         } as Omit<Product, 'id'>;
-
+  
         this.productService.addProduct(newProduct, this.selectedImages).subscribe({
           next: () => {
             this.isUploading = false;
@@ -490,23 +511,13 @@ export class ProductFormComponent implements OnInit {
         });
       }
     };
-
-    // If there are images to delete, do that first
+  
+    // Delete images first, then process the form
     if (this.imagesToRemove.length > 0) {
-      // Handle delete operations in parallel, then proceed
-      Promise.all(deleteImageTasks.map(task => 
-        new Promise(resolve => task.subscribe({
-          next: () => resolve(true),
-          error: err => {
-            console.error('Error deleting image:', err);
-            resolve(false);
-          }
-        }))
-      )).then(() => {
+      Promise.all(deleteImageTasks).then(() => {
         processSubmission();
       });
     } else {
-      // Otherwise just proceed with form submission
       processSubmission();
     }
   }

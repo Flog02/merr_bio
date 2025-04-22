@@ -75,77 +75,88 @@ export class ProductService {
   }
 
   /**
-   * Update product with optional new images
-   * @param id Product ID
-   * @param data Partial product data
-   * @param imageFiles Optional new image files
-   * @param replaceImages Whether to replace existing images (true) or append (false)
-   * @returns Observable<void>
-   */
-  updateProduct(
-    id: string, 
-    data: Partial<Product>,
-    imageFiles?: File[],
-    replaceImages: boolean = false
-  ): Observable<void> {
-    if (!id) {
-      return throwError(() => new Error('Invalid product ID'));
-    }
-    
-    const productRef = doc(this.firestore, 'products', id);
-    
-    // If there are image files to upload
-    if (imageFiles && imageFiles.length > 0) {
-      return from(getDoc(productRef)).pipe(
-        switchMap(docSnap => {
-          if (!docSnap.exists()) {
-            throw new Error('Product not found');
-          }
-          
-          const product = { id: docSnap.id, ...docSnap.data() } as Product;
-          
-          // Upload the new images
-          return this.fileUploadService.uploadProductImages(
-            imageFiles, 
-            id, 
-            product.farmerId
-          ).pipe(
-            switchMap(newImageUrls => {
-              // Determine the final image URLs array
-              let finalImages: string[] = [];
-              
-              if (replaceImages) {
-                // Replace existing images with new ones
-                finalImages = newImageUrls;
-              } else {
-                // Append new images to existing ones
-                const existingImages = product.images || [];
-                finalImages = [...existingImages, ...newImageUrls];
-              }
-              
-              // Update the product with all changes
-              return from(updateDoc(productRef, { 
-                ...data,
-                images: finalImages
-              }));
-            })
-          );
-        }),
-        catchError(error => {
-          console.error(`Error updating product ${id}:`, error);
-          return throwError(() => new Error('Failed to update product'));
-        })
-      );
-    }
-    
-    // If no new images, just update the product data
-    return from(updateDoc(productRef, data)).pipe(
+ * Update product with optional new images
+ * @param id Product ID
+ * @param data Partial product data
+ * @param imageFiles Optional new image files
+ * @param replaceImages Whether to replace existing images (true) or append (false)
+ * @returns Observable<void>
+ */
+updateProduct(
+  id: string, 
+  data: Partial<Product>,
+  imageFiles?: File[],
+  replaceImages: boolean = false
+): Observable<void> {
+  if (!id) {
+    return throwError(() => new Error('Invalid product ID'));
+  }
+  
+  const productRef = doc(this.firestore, 'products', id);
+  
+  // If there are image files to upload
+  if (imageFiles && imageFiles.length > 0) {
+    return from(getDoc(productRef)).pipe(
+      switchMap(docSnap => {
+        if (!docSnap.exists()) {
+          throw new Error('Product not found');
+        }
+        
+        const product = { id: docSnap.id, ...docSnap.data() } as Product;
+        
+        // Upload the new images
+        return this.fileUploadService.uploadProductImages(
+          imageFiles, 
+          id, 
+          product.farmerId
+        ).pipe(
+          switchMap(newImageUrls => {
+            // Determine the final image URLs array
+            let finalImages: string[] = [];
+            
+            if (replaceImages) {
+              // Replace existing images with new ones
+              finalImages = newImageUrls;
+            } else {
+              // Use the current state of existingImages from the data parameter
+              // This ensures we respect images that were removed in the UI
+              const existingImages = data.images || [];
+              finalImages = [...existingImages, ...newImageUrls];
+            }
+            
+            // Create the update data object, including the finalized images array
+            const updateData = {
+              ...data,
+              images: finalImages
+            };
+            
+            // Remove the separate images property if it was in the data
+            // to avoid having two image-related fields
+            if (updateData.hasOwnProperty('images')) {
+              delete data.images;
+            }
+            
+            // Update the product with all changes
+            return from(updateDoc(productRef, updateData));
+          })
+        );
+      }),
       catchError(error => {
         console.error(`Error updating product ${id}:`, error);
         return throwError(() => new Error('Failed to update product'));
       })
     );
   }
+  
+  // If no new images, make sure to update with the correct existing images
+  // This matters when images were removed without adding new ones
+  return from(updateDoc(productRef, data)).pipe(
+    catchError(error => {
+      console.error(`Error updating product ${id}:`, error);
+      return throwError(() => new Error('Failed to update product'));
+    })
+  );
+}
 
   /**
    * Delete a product and its images from storage
