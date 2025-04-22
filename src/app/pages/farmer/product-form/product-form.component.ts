@@ -423,9 +423,9 @@ export class ProductFormComponent implements OnInit {
     }
     
     // Check file size (limit to 2MB)
-    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSizeInBytes) {
-      alert('Image too large. Please select an image smaller than 2MB.');
+      alert('Image too large. Please select an image smaller than 5MB.');
       return false;
     }
     
