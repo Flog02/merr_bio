@@ -11,7 +11,8 @@ import {
   query, 
   orderBy, 
   getDoc,
-  serverTimestamp 
+  serverTimestamp, 
+  getDocs
 } from '@angular/fire/firestore';
 import { Observable, from, map, catchError, throwError, of, switchMap, forkJoin } from 'rxjs';
 import { PurchaseRequest } from '../models/request.model';
@@ -56,6 +57,12 @@ export class PurchaseRequestService {
               return from(updateDoc(docRef, { images: imageUrls })).pipe(
                 map(() => requestId)
               );
+            }),
+            catchError(error => {
+              // If image upload fails, attempt to delete the request document
+              console.error('Error uploading request images:', error);
+              from(deleteDoc(docRef)).subscribe();
+              return throwError(() => new Error('Failed to upload request images'));
             })
           );
         }
@@ -95,7 +102,7 @@ export class PurchaseRequestService {
       return from(getDoc(requestRef)).pipe(
         switchMap(docSnap => {
           if (!docSnap.exists()) {
-            throw new Error('Purchase request not found');
+            return throwError(() => new Error('Purchase request not found'));
           }
           
           const request = { id: docSnap.id, ...docSnap.data() } as PurchaseRequest;
@@ -104,11 +111,32 @@ export class PurchaseRequestService {
           // Upload the new images
           return this.fileUploadService.uploadMultipleFiles(imageFiles, uploadPath).pipe(
             switchMap(newImageUrls => {
-              // Determine the final image URLs array
               let finalImages: string[] = [];
               
               if (replaceImages) {
-                // Replace existing images with new ones
+                // If replacing, we should first delete any existing images
+                const existingImages = request.images || [];
+                if (existingImages.length > 0) {
+                  const deleteImageTasks = existingImages.map(url => 
+                    this.fileUploadService.deleteFile(url).pipe(
+                      catchError(error => {
+                        console.error(`Error deleting image ${url}:`, error);
+                        return of(false);
+                      })
+                    )
+                  );
+                  
+                  return forkJoin(deleteImageTasks).pipe(
+                    switchMap(() => {
+                      // After deleting old images, update with new ones
+                      return from(updateDoc(requestRef, { 
+                        ...data,
+                        images: newImageUrls
+                      }));
+                    })
+                  );
+                }
+                
                 finalImages = newImageUrls;
               } else {
                 // Append new images to existing ones
@@ -126,7 +154,7 @@ export class PurchaseRequestService {
         }),
         catchError(error => {
           console.error(`Error updating request ${id}:`, error);
-          return throwError(() => new Error('Failed to update purchase request'));
+          return throwError(() => new Error(`Failed to update purchase request: ${error.message}`));
         })
       );
     }
@@ -135,7 +163,7 @@ export class PurchaseRequestService {
     return from(updateDoc(requestRef, data)).pipe(
       catchError(error => {
         console.error(`Error updating request ${id}:`, error);
-        return throwError(() => new Error('Failed to update purchase request'));
+        return throwError(() => new Error(`Failed to update purchase request: ${error.message}`));
       })
     );
   }
@@ -173,6 +201,7 @@ export class PurchaseRequestService {
    */
   getRequestsByCustomer(customerId: string): Observable<PurchaseRequest[]> {
     if (!customerId) {
+      console.error('Invalid customer ID provided');
       return of([]);
     }
     
@@ -195,6 +224,7 @@ export class PurchaseRequestService {
    */
   getRequestsByFarmer(farmerId: string): Observable<PurchaseRequest[]> {
     if (!farmerId) {
+      console.error('Invalid farmer ID provided');
       return of([]);
     }
     
@@ -232,6 +262,7 @@ export class PurchaseRequestService {
 
   /**
    * Delete a purchase request and its images
+   * Improved to ensure complete deletion and better error handling
    * @param id Request ID
    * @returns Observable<void>
    */
@@ -246,36 +277,109 @@ export class PurchaseRequestService {
     return from(getDoc(requestRef)).pipe(
       switchMap(docSnap => {
         if (!docSnap.exists()) {
-          throw new Error('Purchase request not found');
+          console.log(`Purchase request ${id} not found, nothing to delete`);
+          return of(undefined);
         }
         
         const request = { id: docSnap.id, ...docSnap.data() } as PurchaseRequest;
         const imageUrls = request.images || [];
         
-        // Create array of observables for deleting each image
-        const deleteImageTasks = imageUrls.map(url => 
-          this.fileUploadService.deleteFile(url)
-        );
-        
-        // If there are images to delete
-        if (deleteImageTasks.length > 0) {
-          // Delete images first, then delete the request
-          return forkJoin(deleteImageTasks).pipe(
-            switchMap(() => from(deleteDoc(requestRef))),
+        // If no images, just delete the request document
+        if (imageUrls.length === 0) {
+          return from(deleteDoc(requestRef)).pipe(
+            map(() => {
+              console.log(`Successfully deleted request ${id}`);
+              return undefined;
+            }),
             catchError(error => {
-              console.error(`Error deleting images for request ${id}:`, error);
-              // Even if image deletion fails, try to delete the request document
-              return from(deleteDoc(requestRef));
+              console.error(`Error deleting request document ${id}:`, error);
+              return throwError(() => new Error(`Failed to delete request document: ${error.message}`));
             })
           );
         }
         
-        // If no images, just delete the request
-        return from(deleteDoc(requestRef));
+        // Create array of observables for deleting each image
+        // Using map + catchError to handle individual image deletion errors
+        const deleteImageTasks = imageUrls.map(url => 
+          this.fileUploadService.deleteFile(url).pipe(
+            catchError(error => {
+              console.error(`Error deleting image ${url} for request ${id}:`, error);
+              return of(false); // Return false for failed deletion but continue
+            })
+          )
+        );
+        
+        // Delete all images first
+        return forkJoin(deleteImageTasks).pipe(
+          switchMap(results => {
+            console.log(`Deleted ${results.filter(Boolean).length}/${imageUrls.length} images for request ${id}`);
+            
+            // Then delete the request document
+            return from(deleteDoc(requestRef)).pipe(
+              map(() => {
+                console.log(`Successfully deleted request document ${id}`);
+                return undefined;
+              }),
+              catchError(error => {
+                console.error(`Error deleting request document ${id}:`, error);
+                return throwError(() => new Error(`Failed to delete request: ${error.message}`));
+              })
+            );
+          })
+        );
       }),
       catchError(error => {
-        console.error(`Error deleting request ${id}:`, error);
-        return throwError(() => new Error('Failed to delete purchase request'));
+        console.error(`Error in request deletion process for ${id}:`, error);
+        return throwError(() => new Error(`Failed to delete request: ${error.message}`));
+      })
+    );
+  }
+  
+  /**
+   * Delete all requests for a specific customer, including their images
+   * @param customerId Customer ID
+   * @returns Observable<void>
+   */
+  deleteRequestsByCustomer(customerId: string): Observable<void> {
+    if (!customerId) {
+      console.error('Invalid customer ID provided');
+      return throwError(() => new Error('Invalid customer ID'));
+    }
+    
+    const requestsRef = collection(this.firestore, 'requests');
+    const q = query(requestsRef, where('customerId', '==', customerId));
+    
+    return from(getDocs(q)).pipe(
+      switchMap(querySnapshot => {
+        if (querySnapshot.empty) {
+          console.log(`No requests found for customer ${customerId}`);
+          return of(undefined);
+        }
+        
+        console.log(`Found ${querySnapshot.size} requests to delete for customer ${customerId}`);
+        
+        // Create deletion tasks for each request
+        const deletionTasks = querySnapshot.docs.map(docSnapshot => {
+          const requestId = docSnapshot.id;
+          return this.deleteRequest(requestId).pipe(
+            catchError(error => {
+              console.error(`Error deleting request ${requestId}:`, error);
+              return of(undefined); // Continue with other deletions
+            })
+          );
+        });
+        
+        // Execute all deletions
+        return forkJoin(deletionTasks).pipe(
+          map(() => {
+            console.log(`Completed deletion of requests for customer ${customerId}`);
+            return undefined;
+          })
+        );
+      }),
+      catchError(error => {
+        console.error(`Error deleting requests for customer ${customerId}:`, error);
+        return throwError(() => new Error(`Failed to delete customer requests: ${error.message}`));
       })
     );
   }

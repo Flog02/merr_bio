@@ -11,7 +11,8 @@ import {
   setDoc, 
   deleteDoc, 
   QuerySnapshot, 
-  DocumentData 
+  DocumentData,
+  writeBatch
 } from '@angular/fire/firestore';
 import { 
   Observable, 
@@ -20,7 +21,8 @@ import {
   catchError, 
   of, 
   switchMap, 
-  throwError 
+  throwError,
+  forkJoin
 } from 'rxjs';
 import { User } from '../models/user.model';
 import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
@@ -42,6 +44,11 @@ export class UserService {
    * @returns Observable<User | null>
    */
   getUserById(uid: string): Observable<User | null> {
+    if (!uid) {
+      console.error('Invalid user ID provided to getUserById');
+      return of(null);
+    }
+
     const userRef = doc(this.firestore, 'users', uid);
     return from(getDoc(userRef)).pipe(
       map(docSnap => {
@@ -111,6 +118,7 @@ export class UserService {
    */
   deleteProfileImage(userId: string, imageUrl: string): Observable<boolean> {
     if (!userId || !imageUrl) {
+      console.error('Invalid user ID or image URL provided to deleteProfileImage');
       return of(false);
     }
     
@@ -121,12 +129,19 @@ export class UserService {
           // Then update the user document to remove the profile image URL
           return this.updateUser(userId, { profileImage: null }).pipe(
             map(() => true),
-            catchError(() => of(false))
+            catchError(error => {
+              console.error(`Error updating user profile after image deletion:`, error);
+              return of(false);
+            })
           );
         }
+        console.log(`Failed to delete profile image from storage for user ${userId}`);
         return of(false);
       }),
-      catchError(() => of(false))
+      catchError(error => {
+        console.error(`Error in profile image deletion process:`, error);
+        return of(false);
+      })
     );
   }
 
@@ -141,7 +156,9 @@ export class UserService {
     
     return from(getDocs(q)).pipe(
       map(querySnapshot => 
-        querySnapshot.docs.map(doc => this.parseUserDoc(doc))
+        querySnapshot.docs
+          .filter(doc => doc.exists())
+          .map(doc => this.parseUserDoc(doc))
       ),
       catchError(error => {
         console.error(`Error fetching users with role ${role}:`, error);
@@ -191,67 +208,87 @@ export class UserService {
 
   /**
    * Delete a user and their data
+   * Improved implementation with proper error handling and complete deletion
    * @param uid User ID
    * @returns Observable<void>
    */
   deleteUser(uid: string): Observable<void> {
     if (!uid) {
       console.error('Invalid user ID provided for deletion');
-      return from(Promise.reject(new Error('Invalid user ID')));
+      return throwError(() => new Error('Invalid user ID'));
     }
+    
+    console.log(`Starting deletion process for user ${uid}`);
     
     // First, get the user to check their role and get their profile image if any
     return this.getUserById(uid).pipe(
       switchMap(user => {
-        if (!user) {
-          console.log(`User with ID ${uid} not found, proceeding with deletion anyway`);
-          // Even if user not found, try to delete any products just in case
-          return this.productService.deleteProductsByFarmer(uid).pipe(
-            switchMap(() => {
-              // Then try to delete the user document (which might not exist)
-              const userRef = doc(this.firestore, 'users', uid);
-              return from(deleteDoc(userRef)).pipe(
-                catchError(error => {
-                  // If the document doesn't exist, consider it a success
-                  console.log('User document might not exist, continuing:', error);
-                  return of(undefined);
-                })
-              );
-            })
+        // Collection of deletion tasks to perform
+        const deletionTasks: Observable<unknown>[] = [];
+        
+        // If user is a farmer, delete all their products first
+        if (user?.role === 'farmer') {
+          deletionTasks.push(
+            this.productService.deleteProductsByFarmer(uid).pipe(
+              catchError(error => {
+                console.error(`Error deleting farmer products for ${uid}:`, error);
+                return of(null); // Continue deletion process despite error
+              })
+            )
           );
         }
-        
-        // Create an array of operations to perform
-        const operations: Observable<unknown>[] = [];
         
         // If user has a profile image, delete it
-        if (user.profileImage) {
-          operations.push(this.fileUploadService.deleteFile(user.profileImage));
+        if (user?.profileImage) {
+          deletionTasks.push(
+            this.fileUploadService.deleteFile(user.profileImage).pipe(
+              catchError(error => {
+                console.error(`Error deleting profile image for ${uid}:`, error);
+                return of(null); // Continue deletion process despite error
+              })
+            )
+          );
         }
         
-        // If user is a farmer, first delete all their products
-        if (user.role === 'farmer') {
-          operations.push(this.productService.deleteProductsByFarmer(uid));
-        }
-        
-        // If there are operations to perform, do them first
-        if (operations.length > 0) {
-          return from(operations).pipe(
-            switchMap(() => {
-              // Then delete the user document
-              const userRef = doc(this.firestore, 'users', uid);
-              return from(deleteDoc(userRef));
+        // If no user found or no special deletion tasks, just attempt to delete the user document
+        if (!user || deletionTasks.length === 0) {
+          console.log(`User with ID ${uid} not found or no related data to clean up. Proceeding with document deletion.`);
+          const userRef = doc(this.firestore, 'users', uid);
+          return from(deleteDoc(userRef)).pipe(
+            map(() => {
+              console.log(`Successfully deleted user document ${uid}`);
+              return undefined;
+            }),
+            catchError(error => {
+              console.error(`Error deleting user document ${uid}:`, error);
+              return throwError(() => new Error(`Failed to delete user: ${error.message}`));
             })
           );
-        } else {
-          // Otherwise just delete the user document
-          const userRef = doc(this.firestore, 'users', uid);
-          return from(deleteDoc(userRef));
         }
+        
+        // Execute all related data deletion tasks first
+        return forkJoin(deletionTasks).pipe(
+          switchMap(() => {
+            console.log(`Completed related data cleanup for user ${uid}. Proceeding with user document deletion.`);
+            
+            // Then delete the user document
+            const userRef = doc(this.firestore, 'users', uid);
+            return from(deleteDoc(userRef)).pipe(
+              map(() => {
+                console.log(`Successfully deleted user document ${uid}`);
+                return undefined;
+              }),
+              catchError(error => {
+                console.error(`Error deleting user document ${uid}:`, error);
+                return throwError(() => new Error(`Failed to delete user document: ${error.message}`));
+              })
+            );
+          })
+        );
       }),
       catchError(error => {
-        console.error(`Error deleting user ${uid}:`, error);
-        throw error;
+        console.error(`Complete error in user deletion process for ${uid}:`, error);
+        return throwError(() => new Error(`Failed to delete user: ${error.message}`));
       })
     );
   }
