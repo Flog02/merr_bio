@@ -81,6 +81,19 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent)
   },
   {
+    path: 'admin/chats',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin'] },
+    loadComponent: () => import('./pages/chat/chat-list.component').then(m => m.ChatListComponent)
+  },
+  {
+    path: 'admin/chats/:userId',
+    canActivate: [authGuard, roleGuard],
+    resolve: { valid: userIdResolver },
+    data: { roles: ['admin'] },
+    loadComponent: () => import('./pages/chat/chat.component').then(m => m.ChatComponent)
+  },
+  {
     path: 'farmer/chats',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['farmer'] },

@@ -66,9 +66,7 @@ export class HomePage {
     });
   }
   chatAdmin(){
-this.router.navigate([`${this.currentUser?.role}/chats`,this.adminId])
-// this.router.navigate([`/${this.currentUser?.role}/chats/admin-support`]);
-
-
+// this.router.navigate([`${this.currentUser?.role}/chats`,this.adminId])
+this.router.navigate([`/${this.currentUser?.role}/chats/admin-support`]);
   }
 }
