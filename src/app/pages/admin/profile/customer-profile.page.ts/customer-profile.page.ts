@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PurchaseRequestService } from 'src/app/services/purchase-request.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Observable, switchMap, combineLatest, of, map } from 'rxjs';
+import { Observable, switchMap, combineLatest, of, map, forkJoin } from 'rxjs';
 import { 
-
   IonHeader, 
   IonToolbar, 
   IonTitle, 
@@ -51,6 +50,7 @@ import { ProductService } from 'src/app/services/product.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { TranslatePipe } from 'src/app/pipes/translate.pipe';
 import { PurchaseRequest } from 'src/app/models/request.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-customer-profile',
@@ -79,8 +79,10 @@ import { PurchaseRequest } from 'src/app/models/request.model';
     IonBadge,
     IonItem,
     IonLabel,
-    IonSpinner
-],
+    IonSpinner,
+    IonAvatar,
+    RouterLink
+  ],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -141,74 +143,80 @@ import { PurchaseRequest } from 'src/app/models/request.model';
               </ion-item>
             </div>
             <div class="section-header">
-          <h3>{{ 'CUSTOMER_REQUESTS' | translate }}</h3>
-          <span *ngIf="(requests$ | async)?.length === 0">{{ 'NO_REQUESTS_YET' | translate }}</span>
-          <!-- <span *ngIf="(products$  | async)?.length > 0">{{ (products$ | async)?.length }} {{ 'PRODUCTS' | translate }}</span> -->
-          <span *ngIf="(requests$ | async) as requests">
-  <ng-container *ngIf="requests && requests.length > 0">
-    {{ requests.length }} {{ 'REQUESTS' | translate }}
-  </ng-container>
-</span>
+              <h3>{{ 'CUSTOMER_REQUESTS' | translate }}</h3>
+              <span *ngIf="(requests$ | async)?.length === 0">{{ 'NO_REQUESTS_YET' | translate }}</span>
+              <span *ngIf="(requests$ | async) as requests">
+                <ng-container *ngIf="requests && requests.length > 0">
+                  {{ requests.length }} {{ 'REQUESTS' | translate }}
+                </ng-container>
+              </span>
+            </div>
 
-        </div>
+            <div class="products-container">
+              <ng-container *ngIf="(requestsWithFarmers$ | async) as requestsWithFarmers">
+                <ion-grid>
+                  <ion-row>
+                    <ion-col size="12" sizeSm="6" sizeMd="4" *ngFor="let item of requestsWithFarmers">
+                      <ion-card class="product-card">
+                        <div class="product-image-container">
+                          <img 
+                            [src]="item.request.images && item.request.images.length > 0 ? item.request.images[0] : 'assets/product-placeholder.jpg'" 
+                            class="product-image"
+                          >
+                          <div class="product-status" *ngIf="item.request.status=='pending'">
+                            <ion-badge color="warning">{{ 'PENDING_APPROVAL' | translate }}</ion-badge>
+                          </div>
+                          <div class="product-status" *ngIf="item.request.status=='accepted'">
+                            <ion-badge color="success">{{ 'APPROVED' | translate }}</ion-badge>
+                          </div>
+                          <div class="product-status" *ngIf="item.request.status=='rejected'">
+                            <ion-badge color="danger">{{ 'REJECTED' | translate }}</ion-badge>
+                          </div>
+                        </div>
 
-        <div class="products-container">
-          <ng-container *ngIf="(requests$ | async) as requests">
-            <ion-grid>
-              <ion-row>
-                <ion-col size="12" sizeSm="6" sizeMd="4" *ngFor="let requests of requests">
-                  <ion-card class="product-card">
-                    <div class="product-image-container">
-                      <img 
-                        [src]="requests.images && requests.images.length > 0 ? requests.images[0] : 'assets/product-placeholder.jpg'" 
+                        <ion-card-header>
+                          <ion-card-title>Request ID: {{ item.request.id }} </ion-card-title>
+                          <ion-card-subtitle>Request quantity: {{ item.request.quantity }}</ion-card-subtitle>
+                        </ion-card-header>
                         
-                        class="product-image"
-                      >
-                      <div class="product-status" *ngIf="requests.status=='pending'">
-                        <ion-badge color="warning">{{ 'PENDING_APPROVAL' | translate }}</ion-badge>
-                      </div>
-                      <div class="product-status" *ngIf="requests.status=='accepted'">
-                        <ion-badge color="warning">{{ 'APPROVED' | translate }}</ion-badge>
-                      </div>
-                      <div class="product-status" *ngIf="requests.status=='rejected'">
-                        <ion-badge color="warning">{{ 'REJECTED' | translate }}</ion-badge>
-                      </div>
-                    </div>
+                        <ion-card-content>
+                          <div class="farmer-info" *ngIf="item.farmer" (click)="navigateToFarmerProfile(item.farmer.uid)">
+                            <div class="farmer-profile">
+                              <ion-avatar class="farmer-avatar">
+                                <img *ngIf="item.farmer.profileImage" [src]="item.farmer.profileImage" alt="Farmer">
+                                <ion-icon *ngIf="!item.farmer.profileImage" name="person-circle"></ion-icon>
+                              </ion-avatar>
+                              <div class="farmer-details">
+                                <h4>{{ item.farmer.displayName }}</h4>
+                                <ion-badge color="tertiary">Farmer</ion-badge>
+                              </div>
+                            </div>
+                          </div>
 
-                    <ion-card-header>
-                      <ion-card-title>Request id: <div>{{ requests.productId }}</div></ion-card-title>
-                      <ion-card-title>Farmer ID : <div>{{requests.farmerId}}</div></ion-card-title>
-                
-                      <ion-card-subtitle>Request quantity:{{ requests.quantity }}</ion-card-subtitle>
-
-                    </ion-card-header>
-                    <ion-card-content>
-                        <div>
-                        <p>
-                         {{requests.message}}
-                        </p>
-                        </div>
-        
-                        <div> Date: {{requests.timestamp.toDate()| date:'short'}}
-                        </div>
-                        
-
-                        <div style="justify-self: end; margin-top:10px" (click)="confirmdeleteRequest(requests)">
-                        <ion-icon slot="icon-only" color="danger" name="trash"></ion-icon>
-                        <span style="color: red;">Delete Request</span>
-                        </div>
-                    
-                    </ion-card-content>
-                    
-                   
-                    
-                 
-                  </ion-card>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
-          </ng-container>
-        </div>
+                          <div class="message-container">
+                            <p>{{ item.request.message }}</p>
+                          </div>
+                          
+                          <div class="request-footer">
+                            <div class="request-date">
+                              {{ item.request.timestamp?.toDate() | date:'short' }}
+                            </div>
+                            
+                            <div class="request-actions">
+                              <div class="delete-button" (click)="confirmdeleteRequest(item.request)">
+                                <ion-icon slot="icon-only" color="danger" name="trash"></ion-icon>
+                                <span>Delete</span>
+                              </div>
+                            </div>
+                          </div>
+                        </ion-card-content>
+                      </ion-card>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ng-container>
+            </div>
+            
             <div class="action-buttons" *ngIf="currentUser$ | async as currentUser">
               <ion-button expand="block" fill="outline" *ngIf="currentUser.role === 'customer'" (click)="startChat(customer.uid)">
                 <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
@@ -217,11 +225,7 @@ import { PurchaseRequest } from 'src/app/models/request.model';
             </div>
           </ion-card-content>
         </ion-card>
-
-
-     
       </ng-container>
-   
       
       <ng-template #loading>
         <div class="loading-container">
@@ -285,17 +289,6 @@ import { PurchaseRequest } from 'src/app/models/request.model';
       gap: 8px;
     }
     
-    .verified-badge {
-      display: flex;
-      align-items: center;
-      font-size: 0.8rem;
-      color: var(--ion-color-success);
-      
-      ion-icon {
-        margin-right: 4px;
-      }
-    }
-    
     .contact-details {
       margin-bottom: 24px;
       
@@ -328,10 +321,6 @@ import { PurchaseRequest } from 'src/app/models/request.model';
         color: var(--ion-color-medium);
       }
     }
-   
-    
-   
-   
     
     ion-card-header {
       padding-bottom: 8px;
@@ -348,9 +337,6 @@ import { PurchaseRequest } from 'src/app/models/request.model';
       font-weight: 600;
     }
     
-   
-
-    
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -366,6 +352,98 @@ import { PurchaseRequest } from 'src/app/models/request.model';
         color: var(--ion-color-medium);
       }
     }
+
+    .farmer-info {
+      margin: 0 -16px;
+      padding: 12px 16px;
+      background-color: rgba(var(--ion-color-light-rgb), 0.6);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-bottom: 12px;
+    }
+
+    .farmer-info:hover {
+      background-color: rgba(var(--ion-color-light-rgb), 1);
+    }
+
+    .farmer-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .farmer-avatar {
+      width: 40px;
+      height: 40px;
+      --border-radius: 50%;
+      margin-right: 12px;
+      overflow: hidden;
+    }
+
+    .farmer-avatar ion-icon {
+      width: 100%;
+      height: 100%;
+      font-size: 40px;
+      color: var(--ion-color-medium);
+    }
+
+    .farmer-details {
+      flex: 1;
+    }
+
+    .farmer-details h4 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .message-container {
+      margin: 12px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+    }
+
+    .request-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .request-date {
+      font-size: 0.85rem;
+      color: var(--ion-color-medium);
+    }
+
+    .delete-button {
+      display: flex;
+      align-items: center;
+      color: var(--ion-color-danger);
+      cursor: pointer;
+    }
+
+    .delete-button ion-icon {
+      margin-right: 4px;
+    }
+
+    .product-image-container {
+      position: relative;
+      height: 140px;
+      overflow: hidden;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-status {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 10;
+    }
   `
 })
 export class CustomerPrivateProfilePage implements OnInit {
@@ -373,9 +451,12 @@ export class CustomerPrivateProfilePage implements OnInit {
   currentUser$!: Observable<User | null>;
   isAdmin$!: Observable<boolean>;
   requests$!: Observable<PurchaseRequest[]>;
-farmer$!:Observable<User | null>;
+  farmers$!: Observable<User[]>;
+  requestsWithFarmers$!: Observable<{ request: PurchaseRequest, farmer: User | null }[]>;
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private userService: UserService,
     private purchaseService: PurchaseRequestService,
     private authService: AuthService,
@@ -390,6 +471,7 @@ farmer$!:Observable<User | null>;
   }
 
   ngOnInit() {
+    // Get customer from route params
     this.customer$ = this.route.paramMap.pipe(
       switchMap(params => {
         const customerId = params.get('id');
@@ -400,17 +482,59 @@ farmer$!:Observable<User | null>;
       })
     );
     
-      // Get the customer's requests
-      this.requests$ = this.customer$.pipe(
-        switchMap(customer => {
-          if (customer && customer.uid) {
-            return this.purchaseService.getRequestsByCustomer(customer.uid)
-          }
-          return of([]);
-        })
-      );
-  
+    // Get all farmers for reference
+    this.farmers$ = this.userService.getUsersByRole('farmer');
     
+    // Get the customer's requests
+    this.requests$ = this.customer$.pipe(
+      switchMap(customer => {
+        if (customer && customer.uid) {
+          return this.purchaseService.getRequestsByCustomer(customer.uid);
+        }
+        return of([]);
+      })
+    );
+    
+    // Combine requests with their corresponding farmer data
+    this.requestsWithFarmers$ = this.requests$.pipe(
+      switchMap(requests => {
+        if (requests.length === 0) {
+          return of([]);
+        }
+        
+        // Get unique farmer IDs
+        const farmerIds = [...new Set(
+          requests
+            .map(req => req.farmerId)
+            .filter(id => id) as string[]
+        )];
+        
+        if (farmerIds.length === 0) {
+          // If no farmer IDs, return requests with null farmers
+          return of(requests.map(request => ({ request, farmer: null })));
+        }
+        
+        // Fetch all farmers data once
+        return this.userService.getUsersByRole('farmer').pipe(
+          map(farmers => {
+            // Create a mapping of farmer IDs to farmer objects
+            const farmerMap = new Map<string, User>();
+            farmers.forEach(farmer => {
+              if (farmer && farmer.uid) {
+                farmerMap.set(farmer.uid, farmer);
+              }
+            });
+            
+            // Map each request to include its corresponding farmer
+            return requests.map(request => ({
+              request,
+              farmer: request.farmerId ? farmerMap.get(request.farmerId) || null : null
+            }));
+          })
+        );
+      })
+    );
+  
     // Get the current user
     this.currentUser$ = this.authService.user$;
     
@@ -437,16 +561,21 @@ farmer$!:Observable<User | null>;
     window.location.href = `/admin/chats/${customerId}`;
   }
   
+  navigateToFarmerProfile(farmerId: string) {
+    if (farmerId) {
+      this.router.navigate(['/farmers', farmerId]);
+    }
+  }
   
   deleteRequest(requestId: string) {
     this.purchaseService.deleteRequest(requestId).subscribe({
       next: () => {
         this.showToast('Request deleted successfully', 'success');
-        // Refresh the products list
+        // Refresh the requests list
         this.requests$ = this.customer$.pipe(
           switchMap(customer => {
             if (customer && customer.uid) {
-              return this.purchaseService.getRequestsByCustomer(customer.uid)
+              return this.purchaseService.getRequestsByCustomer(customer.uid);
             }
             return of([]);
           })
@@ -469,10 +598,11 @@ farmer$!:Observable<User | null>;
     
     await toast.present();
   }
-  async confirmdeleteRequest(requests: PurchaseRequest) {
+  
+  async confirmdeleteRequest(request: PurchaseRequest) {
     const alert = await this.alertController.create({
       header: 'Confirm Delete',
-      message: `Are you sure you want to delete ${requests.id}?`,
+      message: `Are you sure you want to delete this request?`,
       buttons: [
         {
           text: 'Cancel',
@@ -482,7 +612,9 @@ farmer$!:Observable<User | null>;
           text: 'Delete',
           role: 'destructive',
           handler: () => {
-            this.deleteRequest(requests.id!);
+            if (request.id) {
+              this.deleteRequest(request.id);
+            }
           }
         }
       ]
@@ -490,9 +622,4 @@ farmer$!:Observable<User | null>;
     
     await alert.present();
   }
- 
-  
-  
-  
- 
 }

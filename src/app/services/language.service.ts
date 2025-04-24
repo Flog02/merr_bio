@@ -9,12 +9,14 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
+      'CUSTOMER_REQUESTS':'Customer Requests',
+      'SUPPORT':'Ndihme',
       'PRODUCT_IMAGES':'Product Images',
       'PROFILE_IMAGE_HINT':'Profile Image',
       'IMAGE_GUIDANCE':'Image Guidance',
       'ADD_IMAGE':'Add Image',
       'REMOVE_PHOTO':'Remove Photo',
-      'MESSAGE_CLIENT':'Message Clieny',
+      'MESSAGE_CLIENT':'Message Client',
       'VIEW':'VIEW',
       'PASSWORD_MIN_LENGTH':'Password too short',
       'EMAIL_INVALID':'Email Invalid',
@@ -178,6 +180,7 @@ export class LanguageService {
     },
     sq: {
       // Common
+      'CUSTOMER_REQUESTS':'Kerkesat e Klientit',
       'PRODUCT_IMAGES':'Imazhet e Produktit',
       'PROFILE_IMAGE_HINT':'Foto Profili',
       'IMAGE_GUIDANCE':'Guida e Fotove',
