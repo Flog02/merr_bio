@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, combineLatest, map, startWith } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { leaf, nutrition, water, grid, search, basketOutline, filterOutline } from 'ionicons/icons';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar,IonGrid,IonRow,IonCol,IonCard,IonCardContent,IonLabel,IonButtons,IonIcon,IonMenuButton,IonSkeletonText,IonChip} from '@ionic/angular/standalone';
+import { leaf, nutrition, water, grid, search, basketOutline, filterOutline, imageOutline } from 'ionicons/icons';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonSearchbar, IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonLabel, IonButtons, IonIcon, IonMenuButton, IonSkeletonText, IonChip, IonBadge } from '@ionic/angular/standalone';
 import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../services/product.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -33,8 +33,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     IonIcon,
     IonMenuButton,
     IonSkeletonText,
-    IonChip
-],
+    IonChip,
+    IonBadge
+  ],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -78,7 +79,17 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
             <ion-col size="12" size-sm="6" size-md="4" size-lg="3" *ngFor="let product of products">
               <ion-card class="product-card" [routerLink]="['/products', product.id]">
                 <div class="card-img-container">
-                  <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+                  <!-- Display first product image if available, otherwise use placeholder -->
+                  <img *ngIf="product.images && product.images.length > 0" [src]="product.images[0]" alt="{{ product.name }}">
+                  <img *ngIf="!product.images || product.images.length === 0" src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+                  
+                  <!-- Image count badge if multiple images -->
+                  <div *ngIf="product.images && product.images.length > 1" class="image-count">
+                    <ion-badge color="dark">
+                      <ion-icon name="images-outline"></ion-icon>
+                      {{ product.images.length }}
+                    </ion-badge>
+                  </div>
                 </div>
                 <ion-card-content>
                   <div class="product-title">{{ product.name }}</div>
@@ -166,12 +177,34 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       .card-img-container {
         height: 160px;
         overflow: hidden;
+        position: relative;
         
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
           transition: transform 0.3s;
+        }
+        
+        .image-count {
+          position: absolute;
+          bottom: 8px;
+          right: 8px;
+          
+          ion-badge {
+            padding: 6px 8px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: rgba(0, 0, 0, 0.6);
+            
+            ion-icon {
+              margin-right: 4px;
+              font-size: 14px;
+            }
+          }
         }
       }
       
@@ -184,6 +217,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         font-weight: 600;
         margin-bottom: 8px;
         color: var(--ion-color-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       
       .price {
@@ -204,6 +240,9 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         font-size: 14px;
         color: var(--ion-text-color);
         opacity: 0.7;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
     
@@ -237,7 +276,7 @@ export class ProductListPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {
-    addIcons({ leaf, nutrition, water, grid, search, basketOutline, filterOutline });
+    addIcons({ leaf, nutrition, water, grid, search, basketOutline, filterOutline, imageOutline });
   }
 
   ngOnInit() {

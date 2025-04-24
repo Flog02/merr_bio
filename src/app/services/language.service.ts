@@ -9,6 +9,11 @@ export class LanguageService {
   private translations = {
     en: {
       // Common
+      'PRODUCT_IMAGES':'Product Images',
+      'PROFILE_IMAGE_HINT':'Profile Image',
+      'IMAGE_GUIDANCE':'Image Guidance',
+      'ADD_IMAGE':'Add Image',
+      'REMOVE_PHOTO':'Remove Photo',
       'MESSAGE_CLIENT':'Message Clieny',
       'VIEW':'VIEW',
       'PASSWORD_MIN_LENGTH':'Password too short',
@@ -173,6 +178,11 @@ export class LanguageService {
     },
     sq: {
       // Common
+      'PRODUCT_IMAGES':'Imazhet e Produktit',
+      'PROFILE_IMAGE_HINT':'Foto Profili',
+      'IMAGE_GUIDANCE':'Guida e Fotove',
+      'ADD_IMAGE':'Shto Foto',
+      'REMOVE_PHOTO':'Fshi Foton',
       'MESSAGE_CLIENT':'Shkruaj Klientit',
       'purchase_request_message':'Mesazh per kërkese blerjeje',
       'purchase_request':'Kerko per te blere',

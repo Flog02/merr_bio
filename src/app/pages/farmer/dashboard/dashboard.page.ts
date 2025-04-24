@@ -116,37 +116,44 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         </div>
         
         <ion-list lines="full">
-          <ion-item-sliding *ngFor="let product of products$ | async">
-            <ion-item (click)="editProduct(product.id)" [routerLink]="['/farmer/products', product.id]" >
-              <div class="product-image" slot="start">
-                <img src="assets/product-placeholder.jpg" alt="{{ product.name }}">
-              </div>
-              <ion-label>
-                <h2>{{ product.name }}</h2>
-                <p>{{ product.price }} ALL - {{ product.quantity }} {{ product.unit }}</p>
-                <p>{{ 'CATEGORY' | translate }}: {{ product.category }}</p>
-              </ion-label>
-              <ion-badge slot="end" color="{{ product.approved ? 'success' : 'warning' }}">
-                {{ product.approved ? ('APPROVED' | translate) : ('PENDING' | translate) }}
-              </ion-badge>
-            </ion-item>
+  <ion-item-sliding *ngFor="let product of products$ | async">
+    <ion-item (click)="editProduct(product.id)" [routerLink]="['/farmer/products', product.id]" >
+      <div class="product-image" slot="start">
+        <!-- Display first product image if available, otherwise use placeholder -->
+        <img *ngIf="product.images && product.images.length > 0" [src]="product.images[0]" alt="{{ product.name }}">
+        <img *ngIf="!product.images || product.images.length === 0" src="assets/product-placeholder.jpg" alt="{{ product.name }}">
+        
+        <!-- Optional: Add an image count indicator if multiple images exist -->
+        <div *ngIf="product.images && product.images.length > 1" class="image-count">
+          <ion-badge color="dark">{{ product.images.length }}</ion-badge>
+        </div>
+      </div>
+      <ion-label>
+        <h2>{{ product.name }}</h2>
+        <p>{{ product.price }} ALL - {{ product.quantity }} {{ product.unit }}</p>
+        <p>{{ 'CATEGORY' | translate }}: {{ product.category }}</p>
+      </ion-label>
+      <ion-badge slot="end" color="{{ product.approved ? 'success' : 'warning' }}">
+        {{ product.approved ? ('APPROVED' | translate) : ('PENDING' | translate) }}
+      </ion-badge>
+    </ion-item>
 
-            <ion-item-options side="end">
-              <ion-item-option color="primary" (click)="editProduct(product.id)">
-                <ion-icon slot="icon-only" name="create"></ion-icon>
-              </ion-item-option>
-              <ion-item-option color="danger" (click)="deleteProduct(product.id)">
-                <ion-icon slot="icon-only" name="trash"></ion-icon>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
-          
-          <ion-item *ngIf="(products$ | async)?.length === 0">
-            <ion-label class="ion-text-center">
-              <p>{{ 'NO_PRODUCTS_YET' | translate }}</p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+    <ion-item-options side="end">
+      <ion-item-option color="primary" (click)="editProduct(product.id)">
+        <ion-icon slot="icon-only" name="create"></ion-icon>
+      </ion-item-option>
+      <ion-item-option color="danger" (click)="deleteProduct(product.id)">
+        <ion-icon slot="icon-only" name="trash"></ion-icon>
+      </ion-item-option>
+    </ion-item-options>
+  </ion-item-sliding>
+  
+  <ion-item *ngIf="(products$ | async)?.length === 0">
+    <ion-label class="ion-text-center">
+      <p>{{ 'NO_PRODUCTS_YET' | translate }}</p>
+    </ion-label>
+  </ion-item>
+</ion-list>
       </div>
       
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -157,6 +164,31 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     </ion-content>
   `,
   styles: [`
+  .product-image {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-count {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
+.image-count ion-badge {
+  padding: 3px;
+  font-size: 10px;
+  opacity: 0.8;
+}
     .dashboard-header {
       padding: 20px;
       background-color: var(--ion-color-primary);

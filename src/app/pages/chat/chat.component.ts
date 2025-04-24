@@ -477,7 +477,7 @@ export class ChatComponent implements OnInit {
     await actionSheet.present();
   }
   checkProfile(otherUserId:any){
-    if(this.otherUser?.role==='farmer' ){
+    if(this.otherUser?.role==='farmer'){
       this.router.navigate([`/farmers`,otherUserId]);
 
     }else{

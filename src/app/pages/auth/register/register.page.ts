@@ -1,17 +1,28 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { Router } from '@angular/router';
-import {  ToastController } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
+import { UserService } from '../../../services/user.service';
+import { FileUploadService } from '../../../services/file-upload.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-import {IonRadio,IonRadioGroup,IonListHeader,IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonContent,IonToolbar,IonInput}from '@ionic/angular/standalone'
-import { FormControl } from '@angular/forms';
-import {AlertController} from '@ionic/angular/standalone'
+import {
+  IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
+  IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar,
+  IonInput, IonAvatar, IonIcon, IonSpinner
+} from '@ionic/angular/standalone';
+import { AlertController } from '@ionic/angular/standalone';
+import { finalize } from 'rxjs';
+
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel, IonHeader, IonTitle,IonInput ,IonButton, IonButtons, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [
+    IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
+    IonHeader, IonTitle, IonInput, IonButton, IonButtons, IonContent, IonToolbar,
+    IonAvatar, IonIcon, IonSpinner, CommonModule, ReactiveFormsModule, TranslatePipe
+  ],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -24,6 +35,33 @@ import {AlertController} from '@ionic/angular/standalone'
 
     <ion-content class="ion-padding">
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- Profile Image Upload -->
+        <div class="profile-image-upload">
+          <div class="avatar-container" (click)="profileImageInput.click()">
+            <div class="avatar">
+              <img *ngIf="imagePreview" [src]="imagePreview" alt="Profile Preview">
+              <ion-icon *ngIf="!imagePreview" name="person"></ion-icon>
+              <div class="avatar-edit-overlay">
+                <ion-icon name="camera"></ion-icon>
+              </div>
+            </div>
+            <div *ngIf="isUploading" class="upload-progress">
+              <ion-spinner name="circles"></ion-spinner>
+            </div>
+          </div>
+          
+          <!-- Hidden file input -->
+          <input
+            type="file"
+            #profileImageInput
+            style="display: none"
+            accept="image/*"
+            (change)="onProfileImageSelected($event)"
+          >
+          
+          <p class="upload-hint">{{ 'PROFILE_IMAGE_HINT' | translate }}</p>
+        </div>
+
         <!-- Email field with error message -->
         <ion-item [class.ion-invalid]="isEmailInvalid()">
           <ion-label position="floating">{{ 'EMAIL' | translate }}</ion-label>
@@ -74,8 +112,9 @@ import {AlertController} from '@ionic/angular/standalone'
           </ion-item>
         </ion-radio-group>
 
-        <ion-button expand="block" type="submit" [disabled]="!registerForm.valid" class="ion-margin-top">
-          {{ 'REGISTER' | translate }}
+        <ion-button expand="block" type="submit" [disabled]="!registerForm.valid || isUploading" class="ion-margin-top">
+          <ion-spinner *ngIf="isSubmitting" name="circles" class="submit-spinner"></ion-spinner>
+          <span *ngIf="!isSubmitting">{{ 'REGISTER' | translate }}</span>
         </ion-button>
       </form>
 
@@ -85,6 +124,93 @@ import {AlertController} from '@ionic/angular/standalone'
     </ion-content>
   `,
   styles: `
+    .profile-image-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .avatar-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: var(--ion-color-light);
+      border: 2px solid var(--ion-color-primary);
+      position: relative;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      ion-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 64px;
+        color: var(--ion-color-medium);
+      }
+    }
+    
+    .avatar-edit-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      
+      ion-icon {
+        font-size: 24px;
+        color: white;
+      }
+    }
+    
+    .avatar-container:hover .avatar-edit-overlay {
+      opacity: 1;
+    }
+    
+    .upload-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      
+      ion-spinner {
+        color: white;
+      }
+    }
+    
+    .upload-hint {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      text-align: center;
+      margin-top: 5px;
+    }
+    
     .error-message {
       color: var(--ion-color-danger);
       font-size: 12px;
@@ -94,20 +220,29 @@ import {AlertController} from '@ionic/angular/standalone'
     ion-item.ion-invalid {
       --highlight-color: var(--ion-color-danger);
     }
+    
+    .submit-spinner {
+      margin-right: 8px;
+    }
   `
 })
 export class RegisterPage {
   @ViewChild('emailInput') emailInput!: IonInput;
   @ViewChild('passwordInput') passwordInput!: IonInput;
+  @ViewChild('profileImageInput') profileImageInput!: ElementRef<HTMLInputElement>;
   
   registerForm: FormGroup;
+  selectedImage: File | null = null;
+  imagePreview: string | null = null;
+  isUploading: boolean = false;
+  isSubmitting: boolean = false;
 
   constructor(
     private formBuilder: FormBuilder,
-    // private formControl:FormControl,
-    // private formGroup:FormGroup,
-    private alertController : AlertController,
+    private alertController: AlertController,
     private authService: AuthService,
+    private userService: UserService,
+    private fileUploadService: FileUploadService,
     private router: Router,
     private toastController: ToastController
   ) {
@@ -123,6 +258,47 @@ export class RegisterPage {
 
   get errorControl() {
     return this.registerForm.controls;
+  }
+
+  // Profile image selection
+  onProfileImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files.length > 0) {
+      this.selectedImage = input.files[0];
+      
+      // Validate file
+      if (!this.isValidImageFile(this.selectedImage)) {
+        this.selectedImage = null;
+        return;
+      }
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+      };
+      reader.readAsDataURL(this.selectedImage);
+    }
+  }
+  
+  // Image validation
+  private isValidImageFile(file: File): boolean {
+    // Check file type
+    const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!acceptedImageTypes.includes(file.type)) {
+      this.presentToast('Invalid file type. Please select an image (JPEG, PNG, GIF, WEBP).', 'danger');
+      return false;
+    }
+    
+    // Check file size (limit to 2MB)
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSizeInBytes) {
+      this.presentToast('Image too large. Please select an image smaller than 5MB.', 'danger');
+      return false;
+    }
+    
+    return true;
   }
 
   // Simple methods to check specific validation errors
@@ -161,46 +337,92 @@ export class RegisterPage {
       setTimeout(() => this.focusFirstInvalidControl(), 100);
       
       // Show a toast with an error message
-      const toast = await this.toastController.create({
-        message: 'Please fix the form errors before submitting',
-        duration: 2000,
-        color: 'danger',
-        position: 'bottom'
-      });
-      
-      await toast.present();
+      this.presentToast('Please fix the form errors before submitting', 'danger');
       return;
     }
 
+    this.isSubmitting = true;
     const { email, password, displayName, phoneNumber, location, role } = this.registerForm.value;
 
-    this.authService.register(email, password, role, displayName, phoneNumber, location)
-      .then(() => {
-        // Successfully registered
-        this.router.navigate(['/']);
-      })
-      .catch(error => {
-        console.error('Registration error', error);
+    try {
+      // First register the user (creates auth account)
+      const userCredential = await this.authService.register(email, password, role, displayName, phoneNumber, location);
+      
+      // If there's a profile image selected, upload it
+      if (this.selectedImage && userCredential.user) {
+        this.isUploading = true;
         
-        // Check for specific Firebase error codes
-        if (error.code === 'auth/email-already-in-use') {
-          this.presentAlert('Email Already Exists', 'This email address is already registered. Please try a different one.');
-        } else {
-          // Generic error handling for other errors
-          this.presentAlert('Registration Error', error.message || 'An error occurred during registration. Please try again.');
-        }
-      });
+        // Upload the image and update the user profile
+        this.fileUploadService.uploadProfileImage(this.selectedImage, userCredential.user.uid)
+          .pipe(
+            finalize(() => {
+              this.isUploading = false;
+              this.isSubmitting = false;
+            })
+          )
+          .subscribe({
+            next: (downloadUrl) => {
+              // Update the user profile with the image URL
+              this.userService.updateUser(userCredential.user.uid, {
+                profileImage: downloadUrl
+              }).subscribe({
+                next: () => {
+                  this.presentToast('Registration successful with profile image', 'success');
+                  this.router.navigate(['/']);
+                },
+                error: (error) => {
+                  console.error('Error updating profile with image:', error);
+                  // Still navigate home as the account was created
+                  this.router.navigate(['/']);
+                }
+              });
+            },
+            error: (error) => {
+              console.error('Error uploading profile image:', error);
+              // Still navigate home as the account was created
+              this.presentToast('Registration successful but image upload failed', 'warning');
+              this.router.navigate(['/']);
+            }
+          });
+      } else {
+        // No image to upload, just complete registration
+        this.isSubmitting = false;
+        this.presentToast('Registration successful', 'success');
+        this.router.navigate(['/']);
+      }
+    } catch (error: any) {
+      this.isSubmitting = false;
+      console.error('Registration error', error);
+      
+      // Check for specific Firebase error codes
+      if (error.code === 'auth/email-already-in-use') {
+        this.presentAlert('Email Already Exists', 'This email address is already registered. Please try a different one.');
+      } else {
+        // Generic error handling for other errors
+        this.presentAlert('Registration Error', error.message || 'An error occurred during registration. Please try again.');
+      }
+    }
   }
 
+  async presentToast(message: string, color: string = 'success') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2000,
+      color,
+      position: 'bottom'
+    });
+    
+    await toast.present();
+  }
   
   async presentAlert(header: string, message: string) {
-  const alert = await this.alertController.create({
-    header,
-    message,
-    buttons: ['OK'],
-    cssClass: 'registration-alert'
-  });
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK'],
+      cssClass: 'registration-alert'
+    });
 
-  await alert.present();
-}
+    await alert.present();
+  }
 }
