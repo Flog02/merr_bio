@@ -21,5 +21,9 @@ export const ADMIN_ROUTES: Routes = [
   {
     path: 'profile',
     loadComponent: () => import('./profile/admin-profile.page').then(m => m.AdminProfilePage)
+  },
+  {
+    path: 'customer/:id',
+    loadComponent: () => import('./profile/customer-profile.page.ts/customer-profile.page').then(m=>m.CustomerPrivateProfilePage)
   }
 ];

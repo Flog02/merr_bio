@@ -54,7 +54,7 @@ import{IonHeader,IonToolbar,IonButtons,IonBackButton,IonTitle,IonSearchbar,IonSe
             <ion-avatar slot="start" *ngIf="user.role==='farmer'"[routerLink]="['/farmers', user.uid]" style="cursor: pointer;">
               <img [src]="user.profileImage || 'https://ionicframework.com/docs/img/demos/avatar.svg'" />
             </ion-avatar>
-            <ion-avatar slot="start" *ngIf="user.role !=='farmer'">
+            <ion-avatar slot="start" *ngIf="user.role !=='farmer'" [routerLink]="['/admin/customer', user.uid]" style="cursor: pointer;">
               <img [src]="user.profileImage || 'https://ionicframework.com/docs/img/demos/avatar.svg'" />
             </ion-avatar>
             <ion-label>
