@@ -180,6 +180,7 @@ export class LanguageService {
     },
     sq: {
       // Common
+      'Password must start with a capital letter, contain at least one number, and be at least 8 characters long':'Passwordi duhet te nisi me shkronje kapitale , te permbaje te pakten nje numer dhe te pakten 8 karaktere',
       'CUSTOMER_REQUESTS':'Kerkesat e Klientit',
       'PRODUCT_IMAGES':'Imazhet e Produktit',
       'PROFILE_IMAGE_HINT':'Foto Profili',

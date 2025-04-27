@@ -21,9 +21,9 @@ import { TranslatePipe } from "../../../pipes/translate.pipe";
   imports: [
     IonTextarea, IonSelect, IonInput, IonNote, IonBackButton, IonItem, IonLabel,
     IonSelectOption, IonHeader, IonTitle, IonButton, IonButtons, IonContent,
-    IonToolbar, IonSpinner, IonIcon, IonChip, IonGrid, IonRow, IonCol,
+    IonToolbar, IonSpinner, IonIcon, IonGrid, IonRow, IonCol,
     CommonModule, ReactiveFormsModule, TranslatePipe
-  ],
+],
   template: `
     <ion-header>
       <ion-toolbar color="primary">

@@ -9,10 +9,11 @@ import { UserService } from '../../../services/user.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 // import{IonInput,IonSearchbar,IonBackButton,IonItemOption,IonItemOptions,IonItemSliding,IonBadge,IonSegmentButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonList,IonAvatar,IonToolbar}from '@ionic/angular/standalone'
 import{IonHeader,IonToolbar,IonButtons,IonBackButton,IonTitle,IonSearchbar,IonSegment,IonSegmentButton,IonLabel,IonContent,IonList,IonItemSliding,IonItem,IonAvatar,IonBadge,IonItemOption,IonItemOptions,IonIcon,IonInput,IonButton}from '@ionic/angular/standalone'
+import { user } from '@angular/fire/auth';
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe,IonSegment,IonInput,IonSearchbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe, IonBackButton, IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonSegmentButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe, IonSegment, IonSearchbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe, IonBackButton, IonItemOption, IonItemOptions, IonItemSliding, IonBadge, IonSegmentButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonList, IonAvatar, IonToolbar],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -62,7 +63,8 @@ import{IonHeader,IonToolbar,IonButtons,IonBackButton,IonTitle,IonSearchbar,IonSe
               <p>{{ user.email }}</p>
               <p *ngIf="user.phoneNumber">{{ user.phoneNumber }}</p>
               <p *ngIf="user.location">{{ user.location }}</p>
-            </ion-label>
+              <p class="user-id">ID: {{ user.uid }}</p>
+                      </ion-label>
             <ion-badge slot="end" color="{{ getRoleBadgeColor(user.role) }}">
               {{ user.role | uppercase }}
             </ion-badge>
@@ -93,6 +95,7 @@ export class AdminUsersPage implements OnInit {
   admins$!: Observable<User[]>;
   allUsers$!: Observable<User[]>;
   filteredUsers$!: Observable<User[]>;
+  userId$!:Observable<User[] |User | null>
 
   searchControl = new FormControl('');
   roleControl = new FormControl('all');
@@ -124,6 +127,7 @@ export class AdminUsersPage implements OnInit {
     this.customers$ = this.userService.getUsersByRole('customer');
     this.farmers$ = this.userService.getUsersByRole('farmer');
     this.admins$ = this.userService.getUsersByRole('admin');
+    // this.userId$=this.userService.getUserById('hi')
     
     this.allUsers$ = combineLatest([this.customers$, this.farmers$, this.admins$]).pipe(
       map(([customers, farmers, admins]) => [...customers, ...farmers, ...admins])
@@ -151,7 +155,9 @@ export class AdminUsersPage implements OnInit {
             (user.displayName?.toLowerCase().includes(searchTermLower) || false) ||
             (user.email?.toLowerCase().includes(searchTermLower) || false) ||
             (user.phoneNumber?.toLowerCase().includes(searchTermLower) || false) ||
-            (user.location?.toLowerCase().includes(searchTermLower) || false)
+            (user.location?.toLowerCase().includes(searchTermLower) || false) ||
+            (user.uid?.toLowerCase().includes(searchTermLower) || false)
+
           );
         });
       })

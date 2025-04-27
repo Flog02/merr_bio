@@ -63,11 +63,12 @@ export const authGuard: CanActivateFn = (route, state) => {
 export const roleGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const allowedRoles = route.data?.['roles'] as string[];
-
+  // const allowedRoles = route.data?.['roles'] as string[];
+const allowedRoles = ['admin','farmer']
   return authService.user$.pipe(
     take(1),
     map(user => {
+      // return true;
       if (user && allowedRoles.includes(user.role)) {
         return true;
       } else if (user) {

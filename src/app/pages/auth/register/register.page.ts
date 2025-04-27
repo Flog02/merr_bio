@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
@@ -10,19 +10,42 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 import {
   IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
   IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar,
-  IonInput, IonAvatar, IonIcon, IonSpinner
+  IonInput, IonAvatar, IonIcon, IonSpinner,IonNote
 } from '@ionic/angular/standalone';
 import { AlertController } from '@ionic/angular/standalone';
 import { finalize } from 'rxjs';
 
+
+function passwordValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  
+  // Check if the password starts with a capital letter
+  const hasCapitalFirst = /^[A-Z]/.test(value);
+  
+  // Check if the password contains at least one number
+  const hasNumber = /[0-9]/.test(value);
+  
+  // We don't need to check length here as we'll use minLength validator separately
+  
+  if (!hasCapitalFirst || !hasNumber) {
+    return {
+      passwordRequirements: {
+        hasCapitalFirst: hasCapitalFirst,
+        hasNumber: hasNumber
+      }
+    };
+  }
+  
+  return null;
+}
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [
-    IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
+    IonNote,IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
     IonHeader, IonTitle, IonInput, IonButton, IonButtons, IonContent, IonToolbar,
-    IonAvatar, IonIcon, IonSpinner, CommonModule, ReactiveFormsModule, TranslatePipe
-  ],
+    IonIcon, IonSpinner, CommonModule, ReactiveFormsModule, TranslatePipe
+],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -75,6 +98,18 @@ import { finalize } from 'rxjs';
         <ion-item [class.ion-invalid]="isPasswordTooShort()">
           <ion-label position="floating">{{ 'PASSWORD' | translate }}</ion-label>
           <ion-input #passwordInput type="password" formControlName="password"></ion-input>
+          <ion-note slot="error" *ngIf="isPasswordTooShort()">
+    Password must be at least 8 characters long
+  </ion-note>
+  <ion-note slot="error" *ngIf="isPasswordMissingCapitalFirst()">
+    Password must start with a capital letter
+  </ion-note>
+  <ion-note slot="error" *ngIf="isPasswordMissingNumber()">
+    Password must contain at least one number
+  </ion-note>
+  <ion-note class="ion-padding-start">
+{{'Password must start with a capital letter, contain at least one number, and be at least 8 characters long'|translate}}
+</ion-note>
         </ion-item>
         <div class="error-message" *ngIf="isPasswordTooShort()">
           {{ 'PASSWORD_MIN_LENGTH' | translate }}
@@ -87,9 +122,20 @@ import { finalize } from 'rxjs';
         </ion-item>
 
         <ion-item>
-          <ion-label position="floating">{{ 'PHONE' | translate }}</ion-label>
-          <ion-input type="tel" formControlName="phoneNumber"></ion-input>
-        </ion-item>
+  <ion-label position="stacked">{{ 'PHONE' | translate }}</ion-label>
+  <div class="phone-input-container">
+    <span class="country-code">+355</span>
+    <ion-input 
+      type="number" 
+      placeholder="699999999" 
+      formControlName="phoneNumber"
+      class="phone-number-input"
+      >
+    
+    </ion-input>
+  </div>
+</ion-item>
+
 
         <ion-item>
           <ion-label position="floating">{{ 'LOCATION' | translate }}</ion-label>
@@ -124,6 +170,22 @@ import { finalize } from 'rxjs';
     </ion-content>
   `,
   styles: `
+   .phone-input-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .country-code {
+    color: var(--ion-color-medium);
+    padding-right: 4px;
+    font-size: 16px;
+    // margin-top: 13px;
+  }
+  
+  .phone-number-input {
+    --padding-start: 0;
+  }
     .profile-image-upload {
       display: flex;
       flex-direction: column;
@@ -248,10 +310,10 @@ export class RegisterPage {
   ) {
     this.registerForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8),passwordValidator ]],
       displayName: ['', [Validators.required]],
-      phoneNumber: [''],
-      location: [''],
+      phoneNumber: ['' ,[Validators.required , Validators.max(10),Validators.min(10)]], 
+      location: ['',[Validators.required]],
       role: ['customer', [Validators.required]]
     });
   }
@@ -311,6 +373,19 @@ export class RegisterPage {
     const control = this.registerForm.get('password');
     return control?.touched && control?.hasError('minlength') || false;
   }
+  isPasswordMissingCapitalFirst(): boolean {
+    const control = this.registerForm.get('password');
+    return control?.touched && 
+           control?.hasError('passwordRequirements') && 
+           !control?.errors?.['passwordRequirements'].hasCapitalFirst || false;
+  }
+  
+  isPasswordMissingNumber(): boolean {
+    const control = this.registerForm.get('password');
+    return control?.touched && 
+           control?.hasError('passwordRequirements') && 
+           !control?.errors?.['passwordRequirements'].hasNumber || false;
+  }
 
   // Focus the first invalid input
   focusFirstInvalidControl() {
@@ -367,7 +442,7 @@ export class RegisterPage {
                 profileImage: downloadUrl
               }).subscribe({
                 next: () => {
-                  this.presentToast('Registration successful with profile image', 'success');
+                  this.presentToast('Registration successful', 'success');
                   this.router.navigate(['/']);
                 },
                 error: (error) => {

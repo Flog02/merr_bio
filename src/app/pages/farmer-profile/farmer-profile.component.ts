@@ -75,10 +75,8 @@ import { TranslatePipe } from 'src/app/pipes/translate.pipe';
     IonBadge,
     IonItem,
     IonLabel,
-    IonAvatar,
-    IonSkeletonText,
     IonSpinner
-  ],
+],
   template: `
     <ion-header>
       <ion-toolbar>

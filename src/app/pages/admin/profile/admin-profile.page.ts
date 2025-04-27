@@ -19,8 +19,8 @@ import { finalize } from 'rxjs/operators';
   imports: [
     FormsModule, IonInput, IonNote, IonSpinner, IonMenuButton, IonItem, IonLabel,
     IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar, IonIcon,
-    IonAvatar, IonToast, CommonModule, ReactiveFormsModule, TranslatePipe
-  ],
+    IonToast, CommonModule, ReactiveFormsModule, TranslatePipe
+],
     template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

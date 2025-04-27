@@ -80,9 +80,8 @@ import { Router } from '@angular/router';
     IonItem,
     IonLabel,
     IonSpinner,
-    IonAvatar,
-    RouterLink
-  ],
+    IonAvatar
+],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -199,7 +198,7 @@ import { Router } from '@angular/router';
                           
                           <div class="request-footer">
                             <div class="request-date">
-                              {{ item.request.timestamp?.toDate() | date:'short' }}
+                              {{ item.request.timestamp.toDate() | date:'short' }}
                             </div>
                             
                             <div class="request-actions">

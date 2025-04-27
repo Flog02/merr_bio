@@ -8,7 +8,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [IonInput,IonGrid, IonRow, IonCol, IonCardTitle, IonCard, IonCardContent, IonCardHeader, IonMenuButton, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
+  imports: [IonGrid, IonRow, IonCol, IonCardTitle, IonCard, IonCardContent, IonCardHeader, IonMenuButton, IonHeader, IonTitle, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, RouterModule, ReactiveFormsModule, TranslatePipe],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

@@ -12,7 +12,7 @@ import{IonCardTitle,IonSpinner,IonCard,IonCardContent,IonCardHeader,IonCardSubti
 @Component({
   selector: 'app-admin-product-detail',
   standalone: true,
-  imports: [RouterLink,CommonModule, TranslatePipe,IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, IonImg, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
+  imports: [RouterLink, CommonModule, TranslatePipe, IonCardTitle, IonSpinner, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonBackButton, CommonModule, TranslatePipe, IonBadge, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar],
   template: `<ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">

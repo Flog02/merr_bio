@@ -3,27 +3,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  IonInput,
   IonSpinner,
   IonHeader,
   IonToolbar,
-  IonTitle,
   IonContent,
   IonButton,
   IonIcon,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardSubtitle,
   IonButtons,
   IonBackButton,
-  IonBadge,
-  IonLabel,
-  IonItem,
-  IonFooter,
-  IonChip,
-  IonImg,
   AlertController,
   ToastController
 } from '@ionic/angular/standalone';
