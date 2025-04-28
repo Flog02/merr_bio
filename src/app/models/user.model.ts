@@ -6,6 +6,8 @@ export interface User {
   role: 'customer' | 'farmer' | 'admin';
   location?: string;
   createdAt?: Date;
-  profileImage?: string | null; // Updated to allow null value
-  // phoneVerified:any;
+  profileImage?: string | null;
+  rating?: number;
+  isVerified?: boolean;
+  verificationSentAt?: Date; // New field to track when verification was sent
 }

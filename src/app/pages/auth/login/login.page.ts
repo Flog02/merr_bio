@@ -1,17 +1,50 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import {  ToastController } from '@ionic/angular/standalone';
+import { ToastController, ModalController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
-import{IonBackButton,IonItem,IonLabel,IonHeader,IonTitle,IonButton,IonButtons,IonIcon,IonContent,IonToolbar,IonInput}from '@ionic/angular/standalone'
+import { VerificationModalComponent } from 'src/app/components/verification-modal/verification-modal.component';
+import { 
+  IonSpinner,
+  IonBackButton,
+  IonItem,
+  IonLabel,
+  IonHeader,
+  IonTitle,
+  IonButton,
+  IonButtons,
+  IonIcon,
+  IonContent,
+  IonToolbar,
+  IonInput,
+  IonAlert
+} from '@ionic/angular/standalone';
 import { FormControl } from '@angular/forms/';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [TranslatePipe,IonBackButton, IonItem, IonLabel, IonHeader, IonTitle, IonButton, IonButtons, IonIcon, IonContent, IonToolbar, CommonModule, ReactiveFormsModule, RouterModule,IonInput],
+  imports: [
+    TranslatePipe,
+    IonBackButton, 
+    IonItem, 
+    IonLabel, 
+    IonHeader, 
+    IonTitle, 
+    IonButton, 
+    IonButtons, 
+    IonIcon, 
+    IonContent, 
+    IonToolbar, 
+    IonAlert,
+    IonSpinner,
+    CommonModule, 
+    ReactiveFormsModule, 
+    RouterModule,
+    IonInput
+  ],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -30,7 +63,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
           <ion-input #emailInput type="email" formControlName="email"></ion-input>
         </ion-item>
         <div class="error-message" *ngIf="isEmailInvalid()">
-         {{'Please_enter_a_valid_email_address'| translate}}
+          {{'Please_enter_a_valid_email_address'| translate}}
         </div>
 
         <!-- Password field -->
@@ -46,10 +79,21 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
         <div class="auth-error" *ngIf="authError">
           <ion-icon name="alert-circle"></ion-icon>
           <span>{{ authError }}</span>
+          
+          <!-- Add verification options if the error is about email verification -->
+          <div *ngIf="authError.includes('verify your email')" class="verification-actions">
+            <ion-button fill="clear" size="small" (click)="resendVerificationEmail()">
+              Resend Verification Email
+            </ion-button>
+            <ion-button fill="clear" size="small" (click)="openVerificationModal()">
+              Check Verification Status
+            </ion-button>
+          </div>
         </div>
 
-        <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="ion-margin-top">
-          Login
+        <ion-button expand="block" type="submit" [disabled]="!loginForm.valid || isSubmitting" class="ion-margin-top">
+          <ion-spinner *ngIf="isSubmitting" name="circles" class="submit-spinner"></ion-spinner>
+          <span *ngIf="!isSubmitting">Login</span>
         </ion-button>
       </form>
 
@@ -76,12 +120,29 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
       background-color: rgba(var(--ion-color-danger-rgb), 0.1);
       color: var(--ion-color-danger);
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .auth-error ion-icon {
       margin-right: 8px;
       font-size: 20px;
+    }
+    
+    .verification-actions {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .verification-actions ion-button {
+      margin: 5px 0;
+      --color: var(--ion-color-primary);
+    }
+    
+    .submit-spinner {
+      margin-right: 8px;
     }
   `
 })
@@ -91,13 +152,18 @@ export class LoginPage {
   
   loginForm: FormGroup;
   authError: string | null = null;
+  isSubmitting: boolean = false;
+  
+  // Store the temp credentials for verification purposes
+  private tempEmail: string | null = null;
+  private tempUser: any = null;
 
   constructor(
     private formBuilder: FormBuilder,
-    // private formControl : FormControl,
     private authService: AuthService,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private modalController: ModalController
   ) {
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -150,28 +216,87 @@ export class LoginPage {
     }
   
     const { email, password } = this.loginForm.value;
+    this.isSubmitting = true;
+    this.tempEmail = email; // Store email for verification purposes
+    
     this.authService.login(email, password).subscribe({
       next: (user) => {
         console.log('Login successful:', user);
+        this.isSubmitting = false;
         this.showToast('Login successful!', 'success');
         this.router.navigate(['/']);
       },
       error: (error) => {
         console.error('Login error', error);
+        this.isSubmitting = false;
         
         // Handle specific authentication errors
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
           this.authError = 'Invalid email or password';
-        } else if (error.code === 'auth/invalid-email'|| error.code=== 'auth/invalid-credential') {
+        } else if (error.code === 'auth/invalid-email'|| error.code === 'auth/invalid-credential') {
           this.authError = 'Please enter a valid email address';
+        } else if (error.code === 'auth/email-not-verified') {
+          // Special handling for unverified email
+          this.authError = 'Please verify your email address before logging in. Check your inbox for the verification link.';
+          this.tempUser = this.authService.auth.currentUser; // Store user for verification actions
         } else {
           this.authError = 'Login failed. Please try again.';
         }
       }
     });
   }
+  
+  // Resend verification email
+  async resendVerificationEmail() {
+    if (!this.tempUser) {
+      // Try to get current user
+      this.tempUser = this.authService.auth.currentUser;
+      
+      if (!this.tempUser) {
+        this.showToast('Unable to resend verification email. Please try logging in again.', 'danger');
+        return;
+      }
+    }
+    
+    try {
+      await this.authService.sendVerificationEmail(this.tempUser);
+      this.showToast('Verification email has been resent. Please check your inbox.', 'success');
+    } catch (error) {
+      console.error('Error resending verification email:', error);
+      this.showToast('Failed to resend verification email. Please try again later.', 'danger');
+    }
+  }
+  
+  // Open verification modal to check status
+  async openVerificationModal() {
+    if (!this.tempEmail) {
+      this.tempEmail = this.loginForm.get('email')?.value;
+      
+      if (!this.tempEmail) {
+        this.showToast('Please enter your email address first.', 'warning');
+        return;
+      }
+    }
+    
+    const modal = await this.modalController.create({
+      component: VerificationModalComponent,
+      componentProps: { email: this.tempEmail },
+      backdropDismiss: false,
+      cssClass: 'verification-modal'
+    });
+    
+    await modal.present();
+    
+    const { data } = await modal.onDidDismiss();
+    
+    if (data?.verified) {
+      // User has verified their email, try logging in again
+      this.showToast('Email verified! You can now log in.', 'success');
+      this.onSubmit(); // Resubmit the form
+    }
+  }
 
-  async showToast(message: string, color: 'success' | 'danger' = 'success') {
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastController.create({
       message: message,
       duration: 2000,

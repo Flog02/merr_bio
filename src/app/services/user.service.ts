@@ -345,7 +345,8 @@ export class UserService {
       location: data.location || '',
       role: data.role || 'customer',
       createdAt: data.createdAt || new Date(),
-      profileImage: data.profileImage || ''
+      profileImage: data.profileImage || '',
+      // isVerified:data.isVerified
     };
   }
 }

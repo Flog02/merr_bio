@@ -1,20 +1,20 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/standalone';
+import { ToastController, ModalController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { FileUploadService } from '../../../services/file-upload.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { VerificationModalComponent } from 'src/app/components/verification-modal/verification-modal.component';
 import {
   IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
   IonHeader, IonTitle, IonButton, IonButtons, IonContent, IonToolbar,
-  IonInput, IonAvatar, IonIcon, IonSpinner,IonNote
+  IonInput, IonAvatar, IonIcon, IonSpinner, IonNote
 } from '@ionic/angular/standalone';
 import { AlertController } from '@ionic/angular/standalone';
 import { finalize } from 'rxjs';
-
 
 function passwordValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
@@ -38,6 +38,7 @@ function passwordValidator(control: AbstractControl): ValidationErrors | null {
   
   return null;
 }
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -45,7 +46,7 @@ function passwordValidator(control: AbstractControl): ValidationErrors | null {
     IonNote,IonRadio, IonRadioGroup, IonListHeader, IonBackButton, IonItem, IonLabel,
     IonHeader, IonTitle, IonInput, IonButton, IonButtons, IonContent, IonToolbar,
     IonIcon, IonSpinner, CommonModule, ReactiveFormsModule, TranslatePipe
-],
+  ],
   template: `
     <ion-header>
       <ion-toolbar color="primary">
@@ -99,17 +100,17 @@ function passwordValidator(control: AbstractControl): ValidationErrors | null {
           <ion-label position="floating">{{ 'PASSWORD' | translate }}</ion-label>
           <ion-input #passwordInput type="password" formControlName="password"></ion-input>
           <ion-note slot="error" *ngIf="isPasswordTooShort()">
-    Password must be at least 8 characters long
-  </ion-note>
-  <ion-note slot="error" *ngIf="isPasswordMissingCapitalFirst()">
-    Password must start with a capital letter
-  </ion-note>
-  <ion-note slot="error" *ngIf="isPasswordMissingNumber()">
-    Password must contain at least one number
-  </ion-note>
-  <ion-note class="ion-padding-start">
-{{'Password must start with a capital letter, contain at least one number, and be at least 8 characters long'|translate}}
-</ion-note>
+            Password must be at least 8 characters long
+          </ion-note>
+          <ion-note slot="error" *ngIf="isPasswordMissingCapitalFirst()">
+            Password must start with a capital letter
+          </ion-note>
+          <ion-note slot="error" *ngIf="isPasswordMissingNumber()">
+            Password must contain at least one number
+          </ion-note>
+          <ion-note class="ion-padding-start">
+            {{'Password must start with a capital letter, contain at least one number, and be at least 8 characters long'|translate}}
+          </ion-note>
         </ion-item>
         <div class="error-message" *ngIf="isPasswordTooShort()">
           {{ 'PASSWORD_MIN_LENGTH' | translate }}
@@ -122,20 +123,18 @@ function passwordValidator(control: AbstractControl): ValidationErrors | null {
         </ion-item>
 
         <ion-item>
-  <ion-label position="stacked">{{ 'PHONE' | translate }}</ion-label>
-  <div class="phone-input-container">
-    <span class="country-code">+355</span>
-    <ion-input 
-      type="number" 
-      placeholder="699999999" 
-      formControlName="phoneNumber"
-      class="phone-number-input"
-      >
-    
-    </ion-input>
-  </div>
-</ion-item>
-
+          <ion-label position="stacked">{{ 'PHONE' | translate }}</ion-label>
+          <div class="phone-input-container">
+            <span class="country-code">+355</span>
+            <ion-input 
+              type="number" 
+              placeholder="699999999" 
+              formControlName="phoneNumber"
+              class="phone-number-input"
+              >
+            </ion-input>
+          </div>
+        </ion-item>
 
         <ion-item>
           <ion-label position="floating">{{ 'LOCATION' | translate }}</ion-label>
@@ -306,13 +305,14 @@ export class RegisterPage {
     private userService: UserService,
     private fileUploadService: FileUploadService,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private modalController: ModalController
   ) {
     this.registerForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8),passwordValidator ]],
+      password: ['', [Validators.required, Validators.minLength(8), passwordValidator]],
       displayName: ['', [Validators.required]],
-      phoneNumber: ['' ,[Validators.required , Validators.max(10),Validators.min(10)]], 
+      phoneNumber: ['' ,[Validators.required, Validators.maxLength(10), Validators.minLength(10)]], 
       location: ['',[Validators.required]],
       role: ['customer', [Validators.required]]
     });
@@ -373,6 +373,7 @@ export class RegisterPage {
     const control = this.registerForm.get('password');
     return control?.touched && control?.hasError('minlength') || false;
   }
+  
   isPasswordMissingCapitalFirst(): boolean {
     const control = this.registerForm.get('password');
     return control?.touched && 
@@ -436,34 +437,33 @@ export class RegisterPage {
             })
           )
           .subscribe({
-            next: (downloadUrl) => {
+            next: async (downloadUrl) => {
               // Update the user profile with the image URL
               this.userService.updateUser(userCredential.user.uid, {
                 profileImage: downloadUrl
               }).subscribe({
-                next: () => {
-                  this.presentToast('Registration successful', 'success');
-                  this.router.navigate(['/']);
+                next: async () => {
+                  // Show verification modal instead of navigating away
+                  await this.presentVerificationModal(email);
                 },
-                error: (error) => {
+                error: async (error) => {
                   console.error('Error updating profile with image:', error);
-                  // Still navigate home as the account was created
-                  this.router.navigate(['/']);
+                  // Still show verification modal
+                  await this.presentVerificationModal(email);
                 }
               });
             },
-            error: (error) => {
+            error: async (error) => {
               console.error('Error uploading profile image:', error);
-              // Still navigate home as the account was created
-              this.presentToast('Registration successful but image upload failed', 'warning');
-              this.router.navigate(['/']);
+              this.isSubmitting = false;
+              // Still show verification modal
+              await this.presentVerificationModal(email);
             }
           });
       } else {
-        // No image to upload, just complete registration
+        // No image to upload, just complete registration and show verification modal
         this.isSubmitting = false;
-        this.presentToast('Registration successful', 'success');
-        this.router.navigate(['/']);
+        await this.presentVerificationModal(email);
       }
     } catch (error: any) {
       this.isSubmitting = false;
@@ -476,6 +476,30 @@ export class RegisterPage {
         // Generic error handling for other errors
         this.presentAlert('Registration Error', error.message || 'An error occurred during registration. Please try again.');
       }
+    }
+  }
+
+  // Present the email verification modal
+  async presentVerificationModal(email: string) {
+    const modal = await this.modalController.create({
+      component: VerificationModalComponent,
+      componentProps: { email },
+      backdropDismiss: false,
+      cssClass: 'verification-modal'
+    });
+    
+    await modal.present();
+    
+    const { data } = await modal.onDidDismiss();
+    
+    if (data?.verified) {
+      // User has verified their email, navigate to dashboard
+      this.presentToast('Email verified successfully!', 'success');
+      // The navigation will happen automatically based on role via auth service
+    } else if (data?.abandoned) {
+      // User abandoned verification, go to home
+      this.presentToast('Registration cancelled. Please register again to continue.', 'warning');
+      this.router.navigate(['/']);
     }
   }
 
