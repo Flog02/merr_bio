@@ -125,16 +125,16 @@ function passwordValidator(control: AbstractControl): ValidationErrors | null {
         <ion-item>
           <ion-label position="stacked">{{ 'PHONE' | translate }}</ion-label>
           <div class="phone-input-container">
-            <span class="country-code">+355</span>
-            <input 
-              type="number" 
-              placeholder="699999999" 
-              formControlName="phoneNumber"
-              class="phone-number-input"   
-              maxlength="10"
-              minlength="10"           >
-            >
-          </div>
+     <span class="country-code">+355</span>
+     <ion-input 
+       type="number" 
+       placeholder="699999999" 
+       formControlName="phoneNumber"
+       class="phone-number-input"
+       >
+     
+     </ion-input>
+   </div>
         </ion-item>
 
         <ion-item>
@@ -313,8 +313,8 @@ export class RegisterPage {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), passwordValidator]],
       displayName: ['', [Validators.required]],
-      phoneNumber: ['' ,[Validators.required, Validators.maxLength(10),Validators.minLength(10)]], 
-      location: ['',[Validators.required]],
+      phoneNumber: ['' ,[Validators.required , Validators.max(10),Validators.min(10)]], 
+            location: ['',[Validators.required]],
       role: ['customer', [Validators.required]]
     });
   }
