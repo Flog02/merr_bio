@@ -311,7 +311,7 @@ export class RegisterPage {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), passwordValidator]],
       displayName: ['', [Validators.required]],
-      phoneNumber: ['' ,[Validators.required, Validators.maxLength(10), Validators.minLength(10)]], 
+      phoneNumber: ['' ,[Validators.required, Validators.max(10), Validators.min(10)]], 
       location: ['',[Validators.required]],
       role: ['customer', [Validators.required]]
     });
