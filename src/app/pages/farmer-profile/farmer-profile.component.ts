@@ -167,7 +167,8 @@ import { TranslatePipe } from 'src/app/pipes/translate.pipe';
             <ion-grid>
               <ion-row>
                 <ion-col size="12" sizeSm="6" sizeMd="4" *ngFor="let product of products">
-                  <ion-card class="product-card">
+                  <ng-container *ngIf="product.approved">
+                  <ion-card class="product-card" >
                     <div class="product-image-container">
                       <img 
                         [src]="product.images && product.images.length > 0 ? product.images[0] : 'assets/product-placeholder.jpg'" 
@@ -209,6 +210,8 @@ import { TranslatePipe } from 'src/app/pipes/translate.pipe';
                       </div>
                     </ion-card-content>
                   </ion-card>
+                  </ng-container>
+                 
                 </ion-col>
               </ion-row>
             </ion-grid>
