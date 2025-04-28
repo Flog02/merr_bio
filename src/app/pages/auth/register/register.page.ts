@@ -130,8 +130,7 @@ function passwordValidator(control: AbstractControl): ValidationErrors | null {
               type="number" 
               placeholder="699999999" 
               formControlName="phoneNumber"
-              class="phone-number-input"
-              >
+              class="phone-number-input"              >
             </ion-input>
           </div>
         </ion-item>

@@ -29,6 +29,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/auth/verify-success/verify-success.component').then(c => c.VerificationSuccessPage)
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/auth/forgot-password/forgot-password.component').then(m=>m.ForgotPasswordPage)
+  },
+  {
+    path: 'reset-password-confirm',
+    loadComponent: () => import('./pages/auth/reset-password-confirmation/reset-password-confirmation.page').then(m => m.ResetPasswordConfirmPage)
+  },
+  {
     path: 'farmers/:id',
     resolve: { valid: userIdResolver },
     loadComponent: () => import('./pages/farmer-profile/farmer-profile.component')

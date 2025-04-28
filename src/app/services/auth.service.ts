@@ -10,7 +10,8 @@ import {
   applyActionCode,
   checkActionCode,
   sendPasswordResetEmail,
-  confirmPasswordReset
+  confirmPasswordReset,
+  verifyPasswordResetCode
 } from '@angular/fire/auth';
 import { 
   Firestore, 
@@ -181,7 +182,7 @@ getCurrentUser(): any {
     this.verificationError.next(null);
     
     return sendEmailVerification(user, {
-      url: window.location.origin + '/verify-success', // Redirect URL after verification
+      url: window.location.origin, // Just use the domain with no path
       handleCodeInApp: true
     })
     .then(() => {
@@ -277,6 +278,72 @@ verifyEmail(actionCode: string): Observable<boolean> {
       this.isVerifying.next(false);
     })
   );
+}
+
+/**
+ * Send password reset email with correctly configured settings
+ * @param email User's email address
+ * @returns Promise<void>
+ */
+sendPasswordResetEmail(email: string): Promise<void> {
+  console.log('[AuthService] Sending password reset email to:', email);
+  
+  // Use just the origin URL without any path, consistent with email verification
+  const actionCodeSettings = {
+    url: window.location.origin, // Do NOT append any paths to the origin
+    handleCodeInApp: false // Standard email link approach works more reliably
+  };
+  
+  console.log('[AuthService] Using password reset settings:', actionCodeSettings);
+  
+  return sendPasswordResetEmail(this.auth, email, actionCodeSettings)
+    .then(() => {
+      console.log('[AuthService] Password reset email sent successfully');
+      return Promise.resolve();
+    })
+    .catch(error => {
+      console.error('[AuthService] Error sending password reset email:', error);
+      return Promise.reject(error);
+    });
+}
+
+/**
+ * Complete the password reset process
+ * @param oobCode The action code from the password reset email
+ * @param newPassword The new password
+ * @returns Promise<void>
+ */
+confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
+  console.log('[AuthService] Confirming password reset');
+  
+  return confirmPasswordReset(this.auth, oobCode, newPassword)
+    .then(() => {
+      console.log('[AuthService] Password reset successful');
+      return Promise.resolve();
+    })
+    .catch(error => {
+      console.error('[AuthService] Error confirming password reset:', error);
+      return Promise.reject(error);
+    });
+}
+
+/**
+ * Verify the password reset code is valid before showing the password reset form
+ * @param oobCode The action code from the password reset email
+ * @returns Promise<string> The email address associated with the code
+ */
+verifyPasswordResetCode(oobCode: string): Promise<string> {
+  console.log('[AuthService] Verifying password reset code');
+  
+  return verifyPasswordResetCode(this.auth, oobCode)
+    .then(email => {
+      console.log('[AuthService] Password reset code valid for email:', email);
+      return email;
+    })
+    .catch(error => {
+      console.error('[AuthService] Invalid or expired password reset code:', error);
+      return Promise.reject(error);
+    });
 }
 
   /**

@@ -240,6 +240,7 @@ export class VerificationSuccessPage implements OnInit, OnDestroy {
     }
   }
   
+  
   processVerification(actionCode: string) {
     console.log('[VerificationSuccess] Processing verification code:', actionCode);
     this.authService.verifyEmail(actionCode).pipe(

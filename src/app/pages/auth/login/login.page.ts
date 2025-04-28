@@ -75,6 +75,13 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
           {{'Password is required'| translate}}
         </div>
 
+          <!-- Forgot password link -->
+          <div class="forgot-password-container">
+          <a routerLink="/forgot-password" class="forgot-password-link">
+            {{ 'FORGOT_PASSWORD' | translate }}
+          </a>
+        </div>
+
         <!-- Authentication error message -->
         <div class="auth-error" *ngIf="authError">
           <ion-icon name="alert-circle"></ion-icon>
