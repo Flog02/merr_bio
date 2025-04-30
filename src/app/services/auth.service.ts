@@ -34,7 +34,8 @@ import {
   catchError, 
   throwError,
   finalize,
-  take
+  take,
+  firstValueFrom
 } from 'rxjs';
 import { User } from '../models/user.model';
 import { Router } from '@angular/router';
@@ -174,31 +175,39 @@ getCurrentUser(): any {
   return this.auth.currentUser;
 }
 
-  /**
-   * Send or resend verification email
-   */
-  sendVerificationEmail(user: any): Promise<void> {
-    this.isVerifying.next(true);
-    this.verificationError.next(null);
+/**
+ * Send or resend verification email
+ */
+async sendVerificationEmail(user: any): Promise<void> {
+  this.isVerifying.next(true);
+  this.verificationError.next(null);
+  
+  try {
+    // Get user data to determine role for redirect
+    const userData = await firstValueFrom(this.getUserData(user.uid).pipe(take(1)));
+    const role = userData?.role || 'customer';
     
-    return sendEmailVerification(user, {
-      url: window.location.origin, // Just use the domain with no path
+    // Create a redirect URL that includes the role for proper navigation after verification
+    const redirectUrl = `${window.location.origin}/auth/verified?role=${role}`;
+    
+    // Send the verification email with the proper redirect URL
+    await sendEmailVerification(user, {
+      url: redirectUrl,
       handleCodeInApp: true
-    })
-    .then(() => {
-      // Update the verification sent time
-      const userRef = doc(this.firestore, 'users', user.uid);
-      return updateDoc(userRef, { verificationSentAt: new Date() });
-    })
-    .catch(error => {
-      console.error('Error sending verification email:', error);
-      this.verificationError.next('Failed to send verification email. Please try again later.');
-      throw error;
-    })
-    .finally(() => {
-      this.isVerifying.next(false);
     });
+    
+    // Update the verification sent time in Firestore
+    const userRef = doc(this.firestore, 'users', user.uid);
+    await updateDoc(userRef, { verificationSentAt: new Date() });
+    
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    this.verificationError.next('Failed to send verification email. Please try again later.');
+    throw error;
+  } finally {
+    this.isVerifying.next(false);
   }
+}
 
   /**
    * Schedule user deletion if not verified within timeLimit minutes
@@ -245,6 +254,9 @@ getCurrentUser(): any {
  /**
  * Process verification from link
  */
+/**
+ * Process verification from link
+ */
 verifyEmail(actionCode: string): Observable<boolean> {
   this.isVerifying.next(true);
   this.verificationError.next(null);
@@ -257,11 +269,19 @@ verifyEmail(actionCode: string): Observable<boolean> {
           switchMap(() => {
             const currentUser = this.auth.currentUser;
             if (currentUser) {
-              return this.updateUserVerificationStatus(currentUser.uid, true).then(() => {
-                // On successful verification, reload the page to complete the login process
-                window.location.reload();
-                return true;
-              });
+              return from(this.updateUserVerificationStatus(currentUser.uid, true)).pipe(
+                switchMap(() => {
+                  // Get the user's role to navigate correctly
+                  return this.getUserData(currentUser.uid);
+                }),
+                tap(userData => {
+                  if (userData && userData.role) {
+                    // Navigate based on user role instead of reloading
+                    this.navigateByRole(userData.role);
+                  }
+                }),
+                map(() => true)
+              );
             }
             return of(true);
           })

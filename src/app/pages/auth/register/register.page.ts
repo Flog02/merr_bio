@@ -550,6 +550,7 @@ export class RegisterPage {
     if (data?.verified) {
       // User has verified their email, navigate to dashboard
       this.presentToast('Email verified successfully!', 'success');
+      this.router.navigate(['/']);
       // The navigation will happen automatically based on role via auth service
     } else if (data?.abandoned) {
       // User abandoned verification, go to home
